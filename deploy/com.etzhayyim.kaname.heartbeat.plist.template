@@ -9,8 +9,8 @@
   <string>com.etzhayyim.kaname.heartbeat</string>
   <key>ProgramArguments</key>
   <array>
-    <string>/bin/bash</string>
-    <string>@REPO@/20-actors/kaname/deploy/run-heartbeat.sh</string>
+    <string>@BB@</string>
+    <string>@REPO@/deploy/run-heartbeat.clj</string>
   </array>
   <key>EnvironmentVariables</key>
   <dict>

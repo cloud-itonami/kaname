@@ -1,6 +1,6 @@
 #!/usr/bin/env bb
 ;; kaname 要 — tests for the leverage-distribution concentration meta-metric.
-;; Run:  bb -cp "20-actors:20-actors/kotodama/src" 20-actors/kaname/tests/test_leverage_concentration.cljc
+;; Run through the repository-native `bb test` task.
 (ns kaname.tests.test-leverage-concentration
   "Tests for leverage-concentration — the meta-metric on the R1 leverage distribution: is the SoS's
   leverage concentrated in one 要 (a single point of leverage) or distributed across comparable

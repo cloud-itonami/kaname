@@ -8,7 +8,7 @@
             [kaname.graph :as graph]
             [kotoba.datom :as kd]))
 
-#?(:clj (def actor-dir (-> *file* io/file .getParentFile .getParentFile)))
+#?(:clj (def actor-dir (io/file (System/getProperty "user.dir"))))
 #?(:clj (def seed (io/file actor-dir "data" "seed-sos.kotoba.edn")))
 
 (deftest test-build-compiles
@@ -29,19 +29,15 @@
 
 #?(:clj
    (deftest test-full-run-persists
-     (let [base (io/file actor-dir "..")
-           chie (io/file base "chie" "out" "ai-ecosystem-datoms.kotoba.edn")]
-       (if (.exists chie)
-         (let [tmp (str (java.io.File/createTempFile "kaname-graph" ".edn"))]
-           (.delete (io/file tmp))
-           (let [out (graph/run {:base-dir (str base) :log-path tmp
-                                 :tx-id "g0" :as-of "as-of:0" :live? false})]
-             (testing "世界認識 perceived ≥2 mirrors into a multilayer world model"
-               (is (>= (count (:loaded out)) 2))
-               (is (pos? (count (get-in out [:world :nodes])))))
-             (testing "the run produced a 要 and persisted a verified tx"
-               (is (some? (:point out)))
-               (is (true? (get-in out [:persist :appended])))
-               (is (true? (:ok (kd/verify-chain tmp))))))
-           (.delete (io/file tmp)))
-         (testing "(skipped — sibling mirror outputs not present)" (is true))))))
+     (let [tmp (str (java.io.File/createTempFile "kaname-graph" ".edn"))]
+       (.delete (io/file tmp))
+       (let [out (graph/run {:actor-root (str actor-dir) :repo-roots {} :log-path tmp
+                             :tx-id "g0" :as-of "as-of:0" :live? false})]
+         (testing "世界認識 loads the repository-local disclosed web mirror"
+           (is (= [:web] (:loaded out)))
+           (is (pos? (count (get-in out [:world :nodes])))))
+         (testing "the run produced a 要 and persisted a verified tx"
+           (is (some? (:point out)))
+           (is (true? (get-in out [:persist :appended])))
+           (is (true? (:ok (kd/verify-chain tmp))))))
+       (.delete (io/file tmp)))))

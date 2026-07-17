@@ -1,8 +1,5 @@
 ;; kaname 要 — ie-flow embedding tests (the SoS scoring leg). ADR-2606212200.
-;; Run (needs the shared ie-flow lib + kotoba.datom on the classpath):
-;;   bb -cp "20-actors:70-tools/src:20-actors/kotodama/src" \
-;;      -e '(require (quote clojure.test) (quote kaname.tests.test-ie-flow)) \
-;;          (clojure.test/run-tests (quote kaname.tests.test-ie-flow))'
+;; Run through `bb test`; shared dependencies are SHA-pinned in bb.edn.
 (ns kaname.tests.test-ie-flow
   (:require [clojure.test :refer [deftest is run-tests]]
             [kaname.methods.ie-flow :as ief]

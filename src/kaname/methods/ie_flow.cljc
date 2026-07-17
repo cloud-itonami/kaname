@@ -21,7 +21,10 @@
             [clojure.string :as str]
             #?(:clj [clojure.java.io :as io])))
 
-(def default-seed "20-actors/kaname/data/seed-sos.kotoba.edn")
+(def default-seed
+  (str (io/file (or (System/getenv "KANAME_REPO")
+                    (System/getProperty "user.dir"))
+                "data" "seed-sos.kotoba.edn")))
 
 (defn- route-factor
   "Fraction of a structural position's leverage that this OPENING route rectifies into

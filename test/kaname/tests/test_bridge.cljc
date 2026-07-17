@@ -10,7 +10,7 @@
             [kaname.methods.kotoba-bridge :as br]
             [kotoba.datom :as kd]))
 
-#?(:clj (def actor-dir (-> *file* io/file .getParentFile .getParentFile)))
+#?(:clj (def actor-dir (io/file (System/getProperty "user.dir"))))
 #?(:clj (def seed (io/file actor-dir "data" "seed-sos.kotoba.edn")))
 
 (deftest test-host-allowlist

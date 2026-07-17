@@ -46,13 +46,13 @@ Concentrator out-concentrates the Doctrine instrument yet has **lower** leverage
 The 11th multiplex layer. Energy was previously implicit inside `:organization`/`:economy`;
 making it explicit lets a node bearing load in BOTH an energy chokepoint AND another domain
 surface with higher versatility (the SoS discriminator). Fed by **amime 網目**'s multi-site
-mesh (ADR-2606212020): amime commits a kaname-form `:energy` graph (`20-actors/amime/out/
+mesh (ADR-2606212020): `com-etzhayyim-amime` commits a kaname-form `:energy` graph (`out/
 energy-sos.kotoba.edn` — flow `:concentrates` onto loads, single-path import is a `:depends-on`
 SPOF), joined via the `:amime` adapter in `join.cljc`. Adding the layer took `D` 10→11, which
 rescales every `L` by 10/11 uniformly — **the argmax (the 要) is invariant** (test-pinned).
-Running amime = G7; joining its committed output = what kaname does. See `tests/test_energy_join.cljc`.
+Running amime = G7; joining its committed output = what kaname does. See `test/kaname/tests/test_energy_join.cljc`.
 
-## Constitutional gates (enforced in code + tests — `methods/gates.cljc`)
+## Constitutional gates (enforced in code + tests — `src/kaname/methods/gates.cljc`)
 
 - **G1 — leverage MAP, never a target-list.** Structural positions only; natural persons
   person-excluded (public ROLEs allowed); no coordinates. `osekkai` refuses a person/coordinate.
@@ -70,7 +70,7 @@ Running amime = G7; joining its committed output = what kaname does. See `tests/
 ## Layout
 
 ```
-methods/
+src/kaname/methods/
   sos.cljc             EDN reader + multilayer load + leverage (C/V/bridge/L, on read) + report   → out/leverage-report.md
   centrality.cljc  R1  exact Brandes betweenness + eigenvector + ΔΦ percolation; L1 (real B inside) → out/centrality-r1.md
   join.cljc        R1  live mirror JOIN: lift a mirror's committed Datom log into a domain layer    → out/joined-ai-leverage.md
@@ -83,9 +83,9 @@ methods/
                        idempotent-by-content, verify-chain tamper-evident; shared kotoba.datom)
   kotoba_bridge.cljc R1 push local commit-DAG → LIVE kotoba engine :8077 (…datomic.transact)        → remote Datom graph
                        host allowlist + graph-cid + :kaname.tx/* provenance + :bridge/* exactly-once cursor
-graph.cljc         R1  langgraph-clj StateGraph ACTOR: :perceive-world(世界認識)→:leverage→:route→:osekkai→:persist
-autorun.cljc       R1  autonomous heartbeat (invoke graph; cycle = log length; resume-safe; bb -main)
-cell.cljc          R1  cell-runner entry `fire` (KanameHeartbeatCell, node naphtali, cron 53 * * * *, healthz 13083)
+src/kaname/graph.cljc   R1  langgraph-clj StateGraph ACTOR
+src/kaname/autorun.cljc R1  autonomous heartbeat
+src/kaname/cell.cljc    R1  cell-runner entry `fire`
   route.cljc           route the 要 to OPENING; refuses capture (G2)                               → out/opening-route.md
   osekkai.cljc         ossekai handoff proposal (advisory/unsent); refuses person/coordinate (G1)  → out/osekkai-handoff.md
   gates.cljc           constitutional gate assertions (ex-info) — G1/G2/G5
@@ -94,8 +94,7 @@ cell.cljc          R1  cell-runner entry `fire` (KanameHeartbeatCell, node napht
 kotoba/schema.edn      :sos-leverage ontology
 data/seed-sos.kotoba.edn        SYNTHETIC illustrative multilayer seed (13 nodes / 20 縁 / 8 of 10 domains)
 data/fixture-mirror-datoms…edn  tiny synthetic mirror Datom-log (join test fixture)
-tests/                 test_{sos,gates,route,osekkai,coverage,centrality,join}  (34 tests / 142 assertions)
-00-contracts/lexicons/com/etzhayyim/kaname/{leveragePoint,osekkaiProposal}.json  (canonical home)
+test/kaname/tests/      standalone Clojure suites
 ```
 
 ### R1 (landed) — real centrality + proven live join
@@ -142,15 +141,16 @@ kaname is now a first-class **langgraph-clj StateGraph actor** (`kaname.graph`, 
 
 - **web-fetch も clj**: `ingest/fetch-text` (babashka.http-client, anonymous GET, no-server-key) +
   `ingest-live!` over `data/ingest-sources.edn` — the ACTOR runtime fetches, not an operator tool.
-- **datomic kotoba**: `methods/kotoba.cljc` persists to the canonical kotoba Datom-log as a
+- **datomic kotoba**: `src/kaname/methods/kotoba.cljc` persists to the canonical kotoba Datom-log as a
   content-addressed commit-DAG (shared `kotoba.datom`): EAVT `[:db/add e a v]`, CID-chained,
   **idempotent-by-content**, **verify-chain** tamper-evident, resume-safe, `data/persisted/` gitignored.
-- **heartbeat**: `kaname.autorun` — `bb 20-actors/kaname/autorun.cljc [base] [log] [--live]`. Verified
+- **heartbeat**: `kaname.autorun` — `bb heartbeat`; optional external mirror roots are supplied as
+  `KANAME_MIRROR_ROOTS_EDN`, never inferred from a numbered-root layout. Verified
   live: beat#0 perceived 6 mirrors (173n/216縁) → 要=OpenAI → persisted; beat#1 `:no-change`.
 
 ### LIVE-engine bridge + fleet registration (founder-approved 06-17)
 
-- **`methods/kotoba_bridge.cljc`** (ibuki-R3 pattern): pushes each local commit-DAG tx to the LIVE
+- **`src/kaname/methods/kotoba_bridge.cljc`** (ibuki-R3 pattern): pushes each local commit-DAG tx to the LIVE
   kotoba engine (`com.etzhayyim.apps.kotoba.datomic.transact`). Host allowlist (loopback + EVO-X2 LAN);
   `graph-cid` KotobaCid parity; `:kaname.tx/*` provenance; `:bridge/*` exactly-once cursor;
   `expected_parent`; DRY-RUN default, `KANAME_KOTOBA_LIVE=1` for live. **Verified vs running :8077**:
@@ -163,18 +163,12 @@ kaname is now a first-class **langgraph-clj StateGraph actor** (`kaname.graph`, 
 ## Run
 
 ```bash
-# from repo root (bb.edn :paths includes 20-actors)
-bb -e '(require (quote clojure.test) (quote kaname.tests.test-sos) (quote kaname.tests.test-gates) \
-                (quote kaname.tests.test-route) (quote kaname.tests.test-osekkai) (quote kaname.tests.test-coverage)) \
-       (clojure.test/run-tests (quote kaname.tests.test-sos) (quote kaname.tests.test-gates) \
-         (quote kaname.tests.test-route) (quote kaname.tests.test-osekkai) (quote kaname.tests.test-coverage))'
-
-# ie-flow / SoS score (ADR-2606212200) — needs the shared lib + kotoba.datom on the classpath:
-bb -cp "20-actors:70-tools/src:20-actors/kotodama/src" 20-actors/kaname/methods/ie_flow.cljc          # flow-state
-bb -cp "20-actors:70-tools/src:20-actors/kotodama/src" 20-actors/kaname/tests/test_ie_flow.cljc       # 4 tests / 12 assertions
+# from repo root; all code dependencies are SHA-pinned in bb.edn
+bb test
+bb -m kaname.methods.ie-flow
 ```
 
-## ie-flow / SoS score (`methods/ie_flow.cljc`, ADR-2606212200)
+## ie-flow / SoS score (`src/kaname/methods/ie_flow.cljc`, ADR-2606212200)
 
 kaname is scored as an **information-control actor** in the SoS scoreboard (it tops it — score
 **0.514**). Via the SHARED `etzhayyim.ie-flow.gate-adapter`: volume = raw cross-domain concentration

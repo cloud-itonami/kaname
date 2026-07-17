@@ -11,7 +11,7 @@ information), then proposes the opening intervention via **ossekai**.
 
 - **DID**: `did:web:kaname.etzhayyim.com`
 - **ADR**: ADR-2606172100 (R0 scaffold, 2026-06-17)
-- **Manifest**: `20-actors/kaname/manifest.jsonld`
+- **Canonical manifest**: `manifest.edn`
 
 ## The leverage measure
 

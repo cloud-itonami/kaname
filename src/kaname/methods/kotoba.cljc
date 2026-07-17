@@ -2,8 +2,8 @@
   "kaname 要 — kotoba Datom-log persistence (ADR-2606172100 R1 / ADR-2605262130 / ADR-2605312345).
 
   Persists the cross-domain leverage readout to the canonical kotoba Datom log as a content-addressed,
-  append-only commit-DAG (the busshi/ugachi/mimamori pattern, via the shared kotoba.datom binding in
-  20-actors/kotodama/src). Each beat is one tx of EAVT `[:db/add e a v]` datoms chained by CID; a
+  append-only commit-DAG through the SHA-pinned shared kotoba.datom library. Each beat is one tx
+  of EAVT `[:db/add e a v]` datoms chained by CID; a
   later edit breaks every downstream CID (tamper-evident). Idempotent-by-content: if the leverage
   readout is unchanged from the last beat, NO new tx is appended (no-op).
 

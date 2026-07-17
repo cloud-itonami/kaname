@@ -13,14 +13,13 @@
   (kotoba_bridge, KANAME_KOTOBA_LIVE + operator DID) remain G7/operator-gated. The returned
   summary is aggregate-only (G1): the single 要 + mirror set + counts, never a per-person score."
   (:require [kaname.autorun :as autorun]
+            [kaname.methods.join :as join]
             [kotoba.datom :as kd]
             #?(:clj [clojure.java.io :as io])))
 
 #?(:clj
-   (defn- actor-dir
-     "20-actors/kaname, resolved from this namespace's classpath location (runs from any cwd)."
-     []
-     (-> (io/resource "kaname/cell.cljc") io/file .getParentFile)))
+   (defn- actor-dir []
+     (io/file (:actor-root (join/default-resolution)))))
 
 #?(:clj
    (def log-default
@@ -31,10 +30,10 @@
      "One heartbeat. Idempotent per log state (cycle derives from log length)."
      ([] (fire nil))
      ([log-path]
-      (let [base   (str (.getParentFile (actor-dir)))      ; 20-actors
+      (let [{:keys [actor-root repo-roots]} (join/default-resolution)
             target (str (or log-path @log-default))
             n      (count (kd/read-log target))
-            r (autorun/beat {:base-dir base :log-path target
+            r (autorun/beat {:actor-root actor-root :repo-roots repo-roots :log-path target
                              :tx-id (str "kaname-" n) :as-of (str "as-of:" n) :live? false})]
         (println (str "KanameHeartbeatCell cycle " n ": 要=" (:point r)
                       " world=" (:world r) " mirrors=" (pr-str (:mirrors r))
