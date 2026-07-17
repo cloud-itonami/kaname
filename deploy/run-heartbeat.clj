@@ -1,0 +1,30 @@
+#!/usr/bin/env bb
+(require '[babashka.process :as process]
+         '[clojure.string :as str]
+         '[kaname.autorun :as autorun]
+         '[kaname.methods.join :as join]
+         '[kaname.methods.kotoba :as kotoba]
+         '[kotoba.datom :as datom])
+
+(defn operator-did []
+  (let [pid (some-> (process/shell {:continue true :out :string}
+                                   "pgrep" "-f" "kotoba-server")
+                    :out str/split-lines first)]
+    (when (seq pid)
+      (some->> (:out (process/shell {:continue true :out :string} "ps" "eww" pid))
+               (re-find #"(?:^|\s)KOTOBA_AGENT_DID=([^\s]+)")
+               second))))
+
+(let [{:keys [actor-root repo-roots]} (join/default-resolution)
+      log-path (str (java.io.File. actor-root kotoba/default-log))
+      cycle (count (datom/read-log log-path))
+      result (autorun/beat
+              {:actor-root actor-root
+               :repo-roots repo-roots
+               :log-path log-path
+               :tx-id (str "kaname-" cycle)
+               :as-of (str "as-of:" cycle)
+               :live? false
+               :bridge? true
+               :operator-did (operator-did)})]
+  (println (select-keys result [:point :world :mirrors :appended :head :bridge])))

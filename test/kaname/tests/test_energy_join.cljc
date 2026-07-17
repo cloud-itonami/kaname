@@ -1,0 +1,31 @@
+(ns kaname.tests.test-energy-join
+  "Energy-domain adapter tests without an implicit sibling checkout."
+  (:require [clojure.test :refer [deftest is testing]]
+            [kaname.methods.join :as join]
+            [kaname.methods.sos :as sos]))
+
+(deftest energy-is-a-domain-layer
+  (is (some #{":energy"} sos/domains))
+  (is (= 11 sos/D)))
+
+(deftest amime-adapter-is-an-explicit-repository-contract
+  (let [a (get join/mirror-adapters :amime)]
+    (is (= "https://github.com/etzhayyim/com-etzhayyim-amime" (:repository a)))
+    (is (= "5fc4c7ef627b3b84c0245fa11a6e674c0b22068e" (:revision a)))
+    (is (= "out/energy-sos.kotoba.edn" (:resource a)))
+    (is (= ":energy" (:domain a)))
+    (is (= ":amime" (:source a)))))
+
+(deftest energy-forms-lift-without-a-checkout-convention
+  (let [g {:nodes {"source" {":organism/label" "Source"}
+                         "load" {":organism/label" "Load"}}
+           :node-order ["source" "load"]
+           :edges [{":en/from" "source" :en/unused nil
+                    ":en/to" "load" ":en/kind" ":concentrates"
+                    ":en/grasping-load" 0.8}]}
+        lifted (join/lift g ":energy" ":amime")
+        edges (filter #(contains? % ":en/from") lifted)]
+    (is (= 1 (count edges)))
+    (is (= ":energy" (get (first edges) ":en/domain")))
+    (is (= "amime/source" (get (first edges) ":en/from")))
+    (is (= "amime/load" (get (first edges) ":en/to")))))

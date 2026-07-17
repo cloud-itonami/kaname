@@ -7,7 +7,7 @@
             [kaname.methods.sos :as sos]
             [kaname.methods.join :as join]))
 
-#?(:clj (def actor-dir (-> *file* io/file .getParentFile .getParentFile)))
+#?(:clj (def actor-dir (io/file (System/getProperty "user.dir"))))
 #?(:clj (def fixture (io/file actor-dir "data" "fixture-mirror-datoms.kotoba.edn")))
 
 (deftest test-datoms->graph
@@ -73,26 +73,10 @@
       (is (= 1 (count (:edges forms-g))))
       (is (contains? (:nodes datom-g) "x")))))
 
-;; Integration — REAL multi-mirror join. Guarded: verifies only when the sibling mirror outputs are
-;; present on disk (they are committed in this repo); skips gracefully elsewhere (never breaks CI).
 #?(:clj
-   (deftest test-real-multi-mirror-join
-     (let [base (io/file actor-dir ".." )
-           chie (io/file base "chie" "out" "ai-ecosystem-datoms.kotoba.edn")
-           tsum (io/file base "tsumugi" "out" "woven-graph.kotoba.edn")]
-       (if (and (.exists chie) (.exists tsum))
-         (let [{:keys [graph loaded]} (join/join-mirrors base)
-               {:keys [nodes edges]} graph
-               res (sos/leverage nodes edges)
-               cross (->> (:V res) (filter (fn [[_ v]] (>= v 2))) (map first))]
-           (testing "≥2 mirrors load + a multilayer graph is produced"
-             (is (>= (count loaded) 2))
-             (is (pos? (count nodes)))
-             (is (>= (count (distinct (keep #(get % ":en/domain") edges))) 2)))
-           (testing "reconcile surfaces a cross-domain entity sourced from ≥2 mirrors (the SoS payoff)"
-             (is (seq cross))
-             (is (some (fn [nid]
-                         (>= (count (get-in nodes [nid ":sos/source-actors"])) 2))
-                       cross))))
-         (testing "(skipped — sibling mirror outputs not present in this checkout)"
-           (is true))))))
+   (deftest test-repository-local-web-join
+     (let [{:keys [graph loaded]}
+           (join/join-mirrors {:actor-root actor-dir :repo-roots {}} [:web])]
+       (is (= [:web] loaded))
+       (is (pos? (count (:nodes graph))))
+       (is (pos? (count (:edges graph)))))))

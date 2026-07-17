@@ -10,6 +10,7 @@
   Portable .cljc — the heartbeat is a thin deterministic wrapper over the graph + kotoba persistence."
   (:require [clojure.string :as str]
             [kaname.graph :as graph]
+            [kaname.methods.join :as join]
             [kaname.methods.kotoba :as kkot]
             [kaname.methods.kotoba-bridge :as bridge]
             [kotoba.datom :as kd]
@@ -18,12 +19,12 @@
 (defn beat
   "Run one perceive→…→persist cycle, then (when :bridge?) push the local commit-DAG to the LIVE
   kotoba engine — FAIL-OPEN (engine down / operator DID absent → the beat still completes locally,
-  reporting :bridge {:error …}; never crashes the heartbeat). input keys: {:base-dir :log-path
+  reporting :bridge {:error …}; never crashes the heartbeat). input keys: {:actor-root :repo-roots :log-path
   :tx-id :as-of :live? :sources-path :bridge?}. Returns a compact status map."
-  [{:keys [base-dir log-path bridge?] :as input}]
+  [{:keys [log-path bridge? operator-did] :as input}]
   (let [out (graph/run input)
         br  #?(:clj (when bridge?
-                      (try (let [r (bridge/push log-path {:live true})]
+                      (try (let [r (bridge/push log-path {:live true :operator-did operator-did})]
                              (select-keys r [:mode :pushed :remote-tx-cids :parent-commit :datoms-confirmed]))
                            (catch Exception e {:error (.getMessage e)})))
                :default nil)]
@@ -40,18 +41,18 @@
 #?(:clj
    (defn -main
      "Resume-safe heartbeat: derive the cycle from the log length, run one beat. Args:
-     [base-dir] [log-path] [--live]. --live refreshes the web mirror by fetching in clj (G7)."
+     [log-path] [--live]. --live refreshes the web mirror by fetching in clj (G7)."
      [& argv]
      (let [pos  (vec (remove #(str/starts-with? (str %) "--") argv))
            live? (boolean (some #{"--live"} argv))    ;; refresh the web mirror by fetching in clj (G7)
            bridge? (boolean (some #{"--bridge"} argv)) ;; push the commit-DAG to the LIVE engine (G7)
-           base (or (first pos) "20-actors")
-           log  (or (second pos) (str (io/file base "kaname" kkot/default-log)))
+           {:keys [actor-root repo-roots]} (join/default-resolution)
+           log  (or (first pos) (str (io/file actor-root kkot/default-log)))
            n    (count (kd/read-log log))
-           r    (beat {:base-dir base :log-path log
+           r    (beat {:actor-root actor-root :repo-roots repo-roots :log-path log
                        :tx-id (str "kaname-" n) :as-of (str "as-of:" n)
                        :live? live? :bridge? bridge?
-                       :sources-path (str (io/file base "kaname" "data" "ingest-sources.edn"))})]
+                       :sources-path (str (io/file actor-root "data" "ingest-sources.edn"))})]
        (println (str "kaname beat #" n ": 要=" (:point r)
                      " world=" (:world r) " mirrors=" (pr-str (:mirrors r))
                      " appended=" (:appended r) (when (:reason r) (str " (" (:reason r) ")"))

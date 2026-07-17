@@ -32,11 +32,13 @@
 (defn perceive-world
   "世界認識 — build the actor's cross-domain world model from committed mirrors. When :live? and a
   :sources-path are given, FIRST refresh the web mirror by fetching live in clj (G7)."
-  [{:keys [base-dir live? sources-path web-out]}]
+  [{:keys [actor-root repo-roots live? sources-path web-out]}]
   #?(:clj
      (when (and live? sources-path)
-       (ingest/ingest-live! sources-path (or web-out (str (io/file base-dir "kaname" "data" "ingested-web.kotoba.edn"))))))
-  (let [{:keys [graph loaded]} (join/join-mirrors #?(:clj (io/file base-dir) :default base-dir))]
+       (ingest/ingest-live! sources-path
+                            (or web-out (str (io/file actor-root "data" "ingested-web.kotoba.edn"))))))
+  (let [{:keys [graph loaded]}
+        (join/join-mirrors {:actor-root actor-root :repo-roots (or repo-roots {})})]
     {:world graph :loaded loaded}))
 
 (defn leverage [{:keys [world]}]
@@ -76,7 +78,7 @@
       (g/compile-graph)))
 
 (defn run
-  "Invoke the actor graph once. input: {:base-dir :tx-id :as-of :log-path :live? :sources-path}.
+  "Invoke the actor graph once. input: {:actor-root :repo-roots :tx-id :as-of :log-path :live? :sources-path}.
   Returns the final state (incl. :point :route :proposal :persist :head)."
   [input]
   (g/invoke (build) input))
@@ -84,10 +86,10 @@
 #?(:clj
    (defn -main
      [& argv]
-     (let [base (or (first argv) "20-actors")
-           log  (or (second argv) (str (io/file base "kaname" kkot/default-log)))
+     (let [{:keys [actor-root repo-roots]} (join/default-resolution)
+           log  (or (first argv) (str (io/file actor-root kkot/default-log)))
            n    (count (kotoba.datom/read-log log))
-           out  (run {:base-dir base :log-path log
+           out  (run {:actor-root actor-root :repo-roots repo-roots :log-path log
                       :tx-id (str "kaname-" n) :as-of (str "as-of:" n) :live? false})]
        (println (str "kaname graph: 要=" (some-> (:point out) second)
                      " mirrors=" (pr-str (:loaded out))

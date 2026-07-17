@@ -1,0 +1,12 @@
+(ns kaname.tests.test-social
+  (:require [clojure.test :refer [deftest is]]
+            [kaname.cells.social-post.state-machine :as state-machine]
+            [kaname.methods.social :as social]))
+
+(deftest shared-publication-adapter
+  (let [post (social/draft-observation-post "bridge" "observed" ["graph" "ledger"])
+        state (state-machine/transition-to-drafted
+               {"subject" "bridge" "sources" ["graph" "ledger"]})]
+    (is (= ":dry-run" (get post ":post/status")))
+    (is (false? (get post ":post/server-held-key")))
+    (is (= state-machine/phase-drafted (get-in state ["cell_state" "phase"])))))

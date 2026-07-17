@@ -12,8 +12,8 @@
          '[clojure.string :as str])
 
 (def label "com.etzhayyim.kaname.heartbeat")
-(def here  (str (fs/parent (fs/absolutize *file*))))                 ; …/20-actors/kaname/deploy
-(def repo  (str (fs/normalize (fs/absolutize (fs/path here ".." ".." ".."))))) ; repo root
+(def here  (str (fs/parent (fs/absolutize *file*))))
+(def repo  (str (fs/normalize (fs/absolutize (fs/path here "..")))))
 (def bb    (or (some-> (fs/which "bb") str) "/opt/homebrew/bin/bb"))
 (def home  (System/getProperty "user.home"))
 (def plist (str home "/Library/LaunchAgents/" label ".plist"))
@@ -37,7 +37,7 @@
                      (str/replace "@BB@" bb)
                      (str/replace "@HOME@" home))]
     (spit plist rendered))
-  (fs/set-posix-file-permissions (str (fs/path here "run-heartbeat.sh")) "rwxr-xr-x")
+  (fs/set-posix-file-permissions (str (fs/path here "run-heartbeat.clj")) "rwxr-xr-x")
   (sh! "launchctl" "bootout" (str domain "/" label))                 ; idempotent reload
   (p/shell "launchctl" "bootstrap" domain plist)
   (println (str "installed + loaded: " plist " (repo=" repo " bb=" bb ")"))

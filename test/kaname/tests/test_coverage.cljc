@@ -7,7 +7,7 @@
             [kaname.methods.sos :as sos]
             [kaname.methods.coverage-report :as cov]))
 
-#?(:clj (def actor-dir (-> *file* io/file .getParentFile .getParentFile)))
+#?(:clj (def actor-dir (io/file (System/getProperty "user.dir"))))
 #?(:clj (def seed (io/file actor-dir "data" "seed-sos.kotoba.edn")))
 
 #?(:clj
