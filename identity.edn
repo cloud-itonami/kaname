@@ -1,0 +1,4 @@
+{:repository/id "etzhayyim/com-etzhayyim-kaname"
+ :actor/id "kaname"
+ :canonical-path "orgs/etzhayyim/com-etzhayyim-kaname"
+ :canonical-format :edn}

@@ -1,0 +1,13 @@
+{:west/project "orgs/etzhayyim/com-etzhayyim-kaname"
+ :root {:path "root" :revision "ae6832f7ed09147a18b0416de18b44b00c95562a"}
+ :dependencies
+ [{:name "langgraph" :path "orgs/kotoba-lang/langgraph" :revision "a75fe35038dc9218e26b7da4940989cd13754769"}
+  {:name "kotoba-datom" :path "orgs/etzhayyim/com-etzhayyim-kotoba-datom" :revision "3c4b3b92234e59ba285119fd8b2ca4c2ee172ff8"}
+  {:name "ie-flow" :path "orgs/etzhayyim/com-etzhayyim-ie-flow" :revision "35d36d912c9596dbc5094947b60202d9abdf61e6"}
+  {:name "social-publication" :path "orgs/etzhayyim/com-etzhayyim-social-publication" :revision "e8127d0661284b1c12ce1b216c84b5ed2db619ab"}
+  {:name "amime" :path "orgs/etzhayyim/com-etzhayyim-amime" :revision "5fc4c7ef627b3b84c0245fa11a6e674c0b22068e"}
+  {:name "chie" :path "orgs/etzhayyim/com-etzhayyim-chie" :revision "e9058f7ce0fb9087ac1560633c80c5f7147d576c"}
+  {:name "hokorobi" :path "orgs/etzhayyim/com-etzhayyim-hokorobi" :revision "4fe52f3c1c317bedde35018494b2bce38b76bb87"}
+  {:name "inochi" :path "orgs/etzhayyim/com-etzhayyim-inochi" :revision "02a60660ae178d07993b083e24c337c8c3a64483"}
+  {:name "shiori" :path "orgs/etzhayyim/com-etzhayyim-shiori" :revision "91888705db5658ac74f83cf9a2a75f789d7a7506"}
+  {:name "tsumugi" :path "orgs/etzhayyim/com-etzhayyim-tsumugi" :revision "c2a790e0076350cd8d18ca50986d55aaabc552c2"}]}

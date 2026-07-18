@@ -15,6 +15,7 @@
     kaname.tests.test-leverage-concentration
     kaname.tests.test-osekkai
     kaname.tests.test-route
+    kaname.tests.test-repository-contract
     kaname.tests.test-social
     kaname.tests.test-sos])
 

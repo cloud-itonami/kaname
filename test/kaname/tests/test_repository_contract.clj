@@ -1,0 +1,22 @@
+(ns kaname.tests.test-repository-contract
+  (:require [cheshire.core :as json]
+            [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.test :refer [deftest is]]))
+
+(deftest canonical-and-wire-contract
+  (let [contract (edn/read-string (slurp "repository-contracts.edn"))]
+    (is (= :edn (get-in contract [:canonical :format])))
+    (doseq [name ["leveragePoint" "osekkaiProposal"]]
+      (is (.isFile (io/file "lex" (str name ".edn"))))
+      (let [doc (json/parse-string (slurp (io/file "wire/lexicons" (str name ".json"))))]
+        (is (= (str "com.etzhayyim.kaname." name) (get doc "id")))))
+    (doseq [path (:forbidden-root-paths contract)]
+      (is (not (.exists (io/file path)))))))
+
+(deftest exact-flat-west-dependencies
+  (let [deps (edn/read-string (slurp "dependencies.edn"))]
+    (is (= "orgs/etzhayyim/com-etzhayyim-kaname" (:west/project deps)))
+    (doseq [{:keys [path revision]} (:dependencies deps)]
+      (is (re-matches #"orgs/[^/]+/[^/]+" path))
+      (is (re-matches #"[0-9a-f]{40}" revision)))))

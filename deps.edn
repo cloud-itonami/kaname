@@ -1,15 +1,11 @@
 {:paths ["src"]
  :deps {org.clojure/clojure {:mvn/version "1.12.0"}
         io.github.kotoba-lang/langgraph
-        {:git/url "https://github.com/kotoba-lang/langgraph.git"
-         :git/sha "6daa48e7bf86acc13d44804104fced4938530fd2"}
+        {:local/root "../../kotoba-lang/langgraph"}
         com.etzhayyim/kotoba-datom
-        {:git/url "https://github.com/etzhayyim/com-etzhayyim-kotoba-datom.git"
-         :git/sha "3c4b3b92234e59ba285119fd8b2ca4c2ee172ff8"}
+        {:local/root "../com-etzhayyim-kotoba-datom"}
         com.etzhayyim/ie-flow
-        {:git/url "https://github.com/etzhayyim/com-etzhayyim-ie-flow.git"
-         :git/sha "35d36d912c9596dbc5094947b60202d9abdf61e6"}
+        {:local/root "../com-etzhayyim-ie-flow"}
         com.etzhayyim/social-publication
-        {:git/url "https://github.com/etzhayyim/com-etzhayyim-social-publication.git"
-         :git/sha "e8127d0661284b1c12ce1b216c84b5ed2db619ab"}}
+        {:local/root "../com-etzhayyim-social-publication"}}
  :aliases {:test {:extra-paths ["test"]}}}
