@@ -3,7 +3,7 @@
         {:local/root "../../kotoba-lang/langgraph"}
         com.etzhayyim/kotoba-datom
         {:local/root "../com-etzhayyim-kotoba-datom"}
-        com.etzhayyim/ie-flow
+        kotoba-lang/ie-flow
         {:local/root "../com-etzhayyim-ie-flow"}
         com.etzhayyim/social-publication
         {:local/root "../com-etzhayyim-social-publication"}}
