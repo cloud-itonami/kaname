@@ -7,5 +7,5 @@
         kotoba-lang/ie-flow
         {:local/root "../../kotoba-lang/ie-flow"}
         com.etzhayyim/social-publication
-        {:local/root "../com-etzhayyim-social-publication"}}
+        {:local/root "../../kotoba-lang/social-publication"}}
  :aliases {:test {:extra-paths ["test"]}}}
