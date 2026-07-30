@@ -3,7 +3,7 @@
         io.github.kotoba-lang/langgraph
         {:local/root "../../kotoba-lang/langgraph"}
         com.etzhayyim/kotoba-datom
-        {:local/root "../com-etzhayyim-kotoba-datom"}
+        {:local/root "../../etzhayyim/com-etzhayyim-kotoba-datom"}
         kotoba-lang/ie-flow
         {:local/root "../../kotoba-lang/ie-flow"}
         com.etzhayyim/social-publication
