@@ -13,7 +13,7 @@
     - a worklist routed to the next (G7-gated) live join.
 
   Pure fns; reuses kaname.methods.sos. Portable .cljc."
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             [kaname.methods.sos :as sos]
             #?(:clj [clojure.java.io :as io])))
 

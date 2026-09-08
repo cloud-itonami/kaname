@@ -11,7 +11,7 @@
       as ground; emitted in a clearly-flagged transient block.
 
   Reuses kaname.methods.sos. Node walk order = first-touch EDN read order (deterministic)."
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             [kaname.methods.sos :as sos]
             #?(:clj [clojure.java.io :as io])))
 

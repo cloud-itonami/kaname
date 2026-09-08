@@ -8,7 +8,7 @@
   resume-safe (cycle = log length; no wall clock, no randomness), no-server-key.
 
   Portable .cljc — the heartbeat is a thin deterministic wrapper over the graph + kotoba persistence."
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             [kaname.graph :as graph]
             [kaname.methods.join :as join]
             [kaname.methods.kotoba :as kkot]

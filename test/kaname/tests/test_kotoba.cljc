@@ -3,7 +3,7 @@
   to clean EAVT datoms (no ':'-prefixed values), persists idempotent-by-content, and the chain
   verifies (tamper-evident)."
   (:require [clojure.test :refer [deftest is testing run-tests]]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             #?(:clj [clojure.java.io :as io])
             [kaname.methods.sos :as sos]
             [kaname.methods.centrality :as c]

@@ -12,7 +12,7 @@
   log, exactly as busshi records its observation ledger. Values are strings / longs (milli-scaled
   for floats) so the CID is deterministic. No wall clock, no randomness (caller supplies tx-id/as-of).
   no-server-key (local file append only). Portable .cljc (bb)."
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             [kaname.methods.sos :as sos]
             [kotoba.datom :as kd]
             #?(:clj [clojure.java.io :as io])))

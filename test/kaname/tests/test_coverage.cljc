@@ -2,7 +2,7 @@
   "kaname 要 — coverage honesty tests (ADR-2606172100; G6). The synthetic seed joins no live
   mirror; empty domain layers + unjoined mirrors are named, never fabricated."
   (:require [clojure.test :refer [deftest is testing run-tests]]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             #?(:clj [clojure.java.io :as io])
             [kaname.methods.sos :as sos]
             [kaname.methods.coverage-report :as cov]))

@@ -13,7 +13,7 @@
     - high versatility interface/instrument   → :decentralize / :open   (federate the gate)
 
   Pure fns; reuses kaname.methods.sos + kaname.methods.gates. Portable .cljc."
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             [kaname.methods.sos :as sos]
             [kaname.methods.gates :as gates]
             #?(:clj [clojure.java.io :as io])))

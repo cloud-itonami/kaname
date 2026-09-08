@@ -18,7 +18,7 @@
             [kaname.methods.route :as route]
             [etzhayyim.ie-flow.gate-adapter :as ga]
             [etzhayyim.ie-flow.metrics :as iem]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             #?(:clj [clojure.java.io :as io])))
 
 (def default-seed

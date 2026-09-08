@@ -10,7 +10,7 @@
     - rank is deterministic (tie-break by id) and drops non-positive values
     - the report carries the G1/G2 framing (map-not-target / opening-only)"
   (:require [clojure.test :refer [deftest is testing run-tests]]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             #?(:clj [clojure.java.io :as io])
             [kaname.methods.sos :as sos]))
 

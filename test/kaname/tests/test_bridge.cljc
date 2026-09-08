@@ -2,7 +2,7 @@
   "kaname 要 — LIVE-engine bridge tests (ADR-2606172100 R1). Deterministic: host allowlist, graph-CID
   parity, tx_edn provenance, and the exactly-once cursor — all via a STUB transport (no live engine)."
   (:require [clojure.test :refer [deftest is testing run-tests]]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             #?(:clj [clojure.java.io :as io])
             [kaname.methods.sos :as sos]
             [kaname.methods.centrality :as c]
