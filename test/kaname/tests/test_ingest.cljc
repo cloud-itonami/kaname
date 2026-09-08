@@ -5,7 +5,7 @@
     G5 — an edge with no on-the-record basis is dropped.
     rel normalization + kind mapping + representative loads + :authoritative sourcing + namespacing."
   (:require [clojure.test :refer [deftest is testing run-tests]]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [kaname.methods.ingest :as ingest]))
 
 ;; a fixture extraction (what ollama-extract would return) — incl. a person + a basis-less edge

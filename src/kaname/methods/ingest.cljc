@@ -21,7 +21,7 @@
 
   Pure where possible; the two side-effecting edges (HTTP fetch, Ollama call) are isolated. The
   form-building + guards are pure and deterministic (tested on a fixture extraction, no live Ollama)."
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             #?(:clj [clojure.edn :as edn])
             #?(:clj [babashka.http-client :as http])
             #?(:clj [cheshire.core :as json])
@@ -45,7 +45,7 @@
   "Normalize an extracted relationship word to a rel-map key (tolerant of model variants:
   invest-in/investment → invests-in; cloud/compute/chip → compute-provider; etc.)."
   [r]
-  (let [r (-> (str r) str/lower-case str/trim)]
+  (let [r (-> (str r) str/lower str/trim)]
     (cond
       (re-find #"invest" r)                         "invests-in"
       (re-find #"compute|cloud|gpu|chip|infrastructure|systems" r) "compute-provider"
@@ -58,7 +58,7 @@
       :else r)))
 
 (defn- slug [s]
-  (-> (str s) str/lower-case str/trim
+  (-> (str s) str/lower str/trim
       (str/replace #"[^a-z0-9]+" "-") (str/replace #"^-|-$" "")))
 
 (def ^:private person-words #"(?i)\b(ceo|cto|founder|chair|chairman|president|director|officer|mr|ms|dr|prof)\b")
@@ -70,8 +70,8 @@
   [{:keys [label sector kind]}]
   (boolean (or (re-find person-words (str sector)) (re-find person-words (str kind))
                (re-find person-words (str label))
-               (= "person" (str/lower-case (str kind)))
-               (= "person" (str/lower-case (str sector))))))
+               (= "person" (str/lower (str kind)))
+               (= "person" (str/lower (str sector))))))
 
 (def extraction-prompt-preamble
   (str "You extract DISCLOSED organizational relationships from a public web page. "

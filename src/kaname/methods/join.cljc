@@ -13,7 +13,7 @@
   G1/G4 preserved: lifted nodes are :sos/entity structural positions; person nodes are dropped
   (a mirror's public-ROLE nodes lift as roles, private profiles are never present upstream).
   Pure fns; reuses kaname.methods.sos. Portable .cljc."
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             [kaname.methods.sos :as sos]
             #?(:clj [clojure.edn :as edn])
             #?(:clj [clojure.java.io :as io])))
@@ -138,7 +138,7 @@
   whitespace. Conservative — keeps distinct multi-word names (e.g. \"google deepmind\" ≠ \"google\")."
   [s]
   (-> (str s)
-      str/lower-case
+      str/lower
       (str/replace #"\([^)]*\)" " ")
       (str/replace #"[.,]" " ")
       (str/replace #"(?i)\b(inc|corp|corporation|co|ltd|limited|llc|plc|group|holdings|platforms|ag|sa|nv)\b" " ")

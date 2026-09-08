@@ -9,7 +9,7 @@
 ;; is ephemeral — re-run install from the merged checkout once kaname lands on main.
 (require '[babashka.fs :as fs]
          '[babashka.process :as p]
-         '[clojure.string :as str])
+         '[kotoba.lang.text :as str])
 
 (def label "com.etzhayyim.kaname.heartbeat")
 (def here  (str (fs/parent (fs/absolutize *file*))))

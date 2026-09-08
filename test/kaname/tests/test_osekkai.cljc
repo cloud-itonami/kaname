@@ -1,7 +1,7 @@
 (ns kaname.tests.test-osekkai
   "kaname 要 — おせっかい handoff tests (ADR-2606172100; G1/G3). The proposal is advisory/unsent,
   carried by ossekai, structural-first; it can never target a natural person."
-  (:require [clojure.test :refer [deftest is testing run-tests]]
+  (:require [kotoba.lang.text] [clojure.test :refer [deftest is testing run-tests]]
             #?(:clj [clojure.java.io :as io])
             [kaname.methods.sos :as sos]
             [kaname.methods.osekkai :as osekkai]))
@@ -43,6 +43,6 @@
   (testing "the handoff report names ossekai as carrier and asserts no-person / advisory"
     (let [[nodes res] (res-)
           md (osekkai/report-md nodes res)]
-      (is (clojure.string/includes? md "ossekai"))
-      (is (clojure.string/includes? md "advisory"))
-      (is (clojure.string/includes? md "no natural person")))))
+      (is (kotoba.lang.text/includes? md "ossekai"))
+      (is (kotoba.lang.text/includes? md "advisory"))
+      (is (kotoba.lang.text/includes? md "no natural person")))))

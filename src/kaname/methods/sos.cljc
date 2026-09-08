@@ -34,7 +34,7 @@
   House style mirrors the mirror-lineage cljc ports (chie/busshi/ugachi): self-contained minimal
   EDN reader, ':…' keywords kept as strings, pure fns, deterministic ordering by (-value, id),
   file I/O only at edges. Portable .cljc (clj-native — no Python twin)."
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             #?(:clj [clojure.java.io :as io])))
 
 ;; ── minimal EDN reader (subset: vectors [], maps {}, :keyword, "string", num, bool, nil) ──

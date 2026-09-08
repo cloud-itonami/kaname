@@ -12,7 +12,7 @@
          intent is refused.
     G5 — no thought-policing. A belief-content score (:belief/wrongness / :faith/rank) is
          unrepresentable; :influences must carry an on-the-record :en/basis."
-  (:require [clojure.string :as str]))
+  (:require [kotoba.lang.text :as str]))
 
 (def route-enum
   "The ONLY admissible routings — all dissolve concentration (G2)."

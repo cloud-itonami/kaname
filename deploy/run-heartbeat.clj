@@ -1,6 +1,6 @@
 #!/usr/bin/env bb
 (require '[babashka.process :as process]
-         '[clojure.string :as str]
+         '[kotoba.lang.text :as str]
          '[kaname.autorun :as autorun]
          '[kaname.methods.join :as join]
          '[kaname.methods.kotoba :as kotoba]

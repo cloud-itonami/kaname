@@ -19,7 +19,7 @@
   All deterministic + pure (node order sorted; ties broken by id). Reuses kaname.methods.sos.
   Portable .cljc (clj-native). Full multiplex eigenvector-versatility (De Domenico et al.) over the
   tensor stays a future refinement; this R1 ships exact projection betweenness + ΔΦ."
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             [clojure.set :as set]
             [kaname.methods.sos :as sos]
             #?(:clj [clojure.java.io :as io])))

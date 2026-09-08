@@ -14,7 +14,7 @@
        representable in the proposal shape.
 
   Pure fns; reuses sos + route + gates. Portable .cljc."
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             [kaname.methods.sos :as sos]
             [kaname.methods.route :as route]
             [kaname.methods.gates :as gates]

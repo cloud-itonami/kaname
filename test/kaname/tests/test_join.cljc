@@ -2,7 +2,7 @@
   "kaname 要 — live mirror JOIN tests (ADR-2606172100 R1). Parse a mirror's [e a v tx op] Datom
   log, lift it into a domain layer, and reconcile across layers by label — the system-of-systems
   join. Uses a synthetic fixture (deterministic; no dependency on a sibling actor's output)."
-  (:require [clojure.test :refer [deftest is testing run-tests]]
+  (:require [kotoba.lang.text] [clojure.test :refer [deftest is testing run-tests]]
             #?(:clj [clojure.java.io :as io])
             [kaname.methods.sos :as sos]
             [kaname.methods.join :as join]))
@@ -27,7 +27,7 @@
           nodes (filter #(contains? % ":organism/id") forms)
           edges (filter #(contains? % ":en/from") forms)]
       ;; nodes namespaced + classified
-      (is (every? #(clojure.string/starts-with? (get % ":organism/id") "chie/") nodes))
+      (is (every? #(kotoba.lang.text/starts-with? (get % ":organism/id") "chie/") nodes))
       (is (some #(= ":sos/role" (get % ":organism/kind")) nodes))   ; the public chair role
       (is (every? #(= [":chie"] (get % ":sos/source-actors")) nodes))
       ;; compute-deal → :concentrates in :ai ; partners (unmapped) DROPPED
