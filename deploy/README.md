@@ -22,9 +22,9 @@ Idempotent on both legs: a beat with an unchanged world model is `appended=false
 ## Install / manage
 
 ```bash
-bb deploy/install.clj install     # render plist → ~/Library/LaunchAgents, load, kickstart once
-bb deploy/install.clj status      # agent state + tail the log
-bb deploy/install.clj uninstall   # bootout + remove the plist
+bb deploy/install.cljk install     # render plist → ~/Library/LaunchAgents, load, kickstart once
+bb deploy/install.cljk status      # agent state + tail the log
+bb deploy/install.cljk uninstall   # bootout + remove the plist
 ```
 
 `install.clj` and the launchd-invoked `run-heartbeat.clj` are babashka scripts. The runner performs

@@ -8,7 +8,7 @@
         com.etzhayyim/social-publication
         {:local/root "../com-etzhayyim-social-publication"}}
  :tasks {test {:doc "Run all standalone kaname suites"
-               :task (load-file "run_tests.clj")}
+               :task (load-file "run_tests.cljk")}
          heartbeat {:doc "Run one repository-local heartbeat"
                     :task (do (require 'kaname.autorun)
                               ((resolve 'kaname.autorun/-main)))}}}
