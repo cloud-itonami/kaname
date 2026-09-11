@@ -10,7 +10,7 @@
   <key>ProgramArguments</key>
   <array>
     <string>@BB@</string>
-    <string>@REPO@/deploy/run-heartbeat.clj</string>
+    <string>@REPO@/deploy/run-heartbeat.cljk</string>
   </array>
   <key>EnvironmentVariables</key>
   <dict>
