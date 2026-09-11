@@ -1,4 +1,4 @@
-#!/usr/bin/env bb
+#!/usr/bin/env kbb
 (require '[babashka.process :as process]
          '[kotoba.lang.text :as str]
          '[kaname.autorun :as autorun]

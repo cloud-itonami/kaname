@@ -7,7 +7,7 @@ cell-runner home; this LaunchAgent is the operator-run deployment until the flee
 
 ## What it does, on a schedule
 
-Hourly at **:53** (matching the cell-runner cron registration), one `bb autorun … --bridge` beat:
+Hourly at **:53** (matching the cell-runner cron registration), one `kbb -M:autorun … --bridge` beat:
 
 1. **世界認識** — join every committed mirror (chie/tsumugi/inochi/hokorobi/shiori/web) into the
    cross-domain world model.
@@ -22,9 +22,9 @@ Idempotent on both legs: a beat with an unchanged world model is `appended=false
 ## Install / manage
 
 ```bash
-bb deploy/install.cljk install     # render plist → ~/Library/LaunchAgents, load, kickstart once
-bb deploy/install.cljk status      # agent state + tail the log
-bb deploy/install.cljk uninstall   # bootout + remove the plist
+kbb deploy/install.cljk install     # render plist → ~/Library/LaunchAgents, load, kickstart once
+kbb deploy/install.cljk status      # agent state + tail the log
+kbb deploy/install.cljk uninstall   # bootout + remove the plist
 ```
 
 `install.clj` and the launchd-invoked `run-heartbeat.clj` are babashka scripts. The runner performs
@@ -49,5 +49,5 @@ the `pgrep`/`ps` node-DID resolution without a shell wrapper.
 
 `install.clj` resolves the repo root from its own location. If installed from a temporary git
 worktree, that path is **ephemeral** — once kaname merges to `main`, **re-run
-`bb install.clj install` from the merged checkout** so the agent repoints to the stable path (and
+`kbb install.cljk install` from the merged checkout** so the agent repoints to the stable path (and
 `uninstall` the old one).

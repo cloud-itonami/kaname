@@ -144,7 +144,7 @@ kaname is now a first-class **langgraph-clj StateGraph actor** (`kaname.graph`, 
 - **datomic kotoba**: `src/kaname/methods/kotoba.cljk` persists to the canonical kotoba Datom-log as a
   content-addressed commit-DAG (shared `kotoba.datom`): EAVT `[:db/add e a v]`, CID-chained,
   **idempotent-by-content**, **verify-chain** tamper-evident, resume-safe, `data/persisted/` gitignored.
-- **heartbeat**: `kaname.autorun` — `bb heartbeat`; optional external mirror roots are supplied as
+- **heartbeat**: `kaname.autorun` — `kbb -M:heartbeat`; optional external mirror roots are supplied as
   `KANAME_MIRROR_ROOTS_EDN`, never inferred from a numbered-root layout. Verified
   live: beat#0 perceived 6 mirrors (173n/216縁) → 要=OpenAI → persisted; beat#1 `:no-change`.
 
@@ -164,8 +164,8 @@ kaname is now a first-class **langgraph-clj StateGraph actor** (`kaname.graph`, 
 
 ```bash
 # from repo root; all code dependencies are SHA-pinned in bb.edn
-bb test
-bb -m kaname.methods.ie-flow
+kbb -M:test
+kbb -m kaname.methods.ie-flow
 ```
 
 ## ie-flow / SoS score (`src/kaname/methods/ie_flow.cljk`, ADR-2606212200)
