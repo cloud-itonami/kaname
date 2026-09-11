@@ -1,6 +1,6 @@
-#!/usr/bin/env bb
+#!/usr/bin/env kbb
 ;; kaname 要 — tests for the leverage-distribution concentration meta-metric.
-;; Run through the repository-native `bb test` task.
+;; Run through the repository-native `kbb -M:test` task.
 (ns kaname.tests.test-leverage-concentration
   "Tests for leverage-concentration — the meta-metric on the R1 leverage distribution: is the SoS's
   leverage concentrated in one 要 (a single point of leverage) or distributed across comparable

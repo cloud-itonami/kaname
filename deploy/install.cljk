@@ -1,9 +1,9 @@
-#!/usr/bin/env bb
+#!/usr/bin/env kbb
 ;; kaname 要 — install/uninstall the production heartbeat LaunchAgent (ADR-2606172100; deploy 実運用).
 ;; babashka port of install.sh (clj-native deploy).
-;;   bb install.clj install    → render the plist from the template (repo root + bb resolved), load it, kickstart once
-;;   bb install.clj uninstall  → bootout + remove the plist
-;;   bb install.clj status     → print the agent state + tail the log
+;;   kbb install.cljk install    → render the plist from the template (repo root + bb resolved), load it, kickstart once
+;;   kbb install.cljk uninstall  → bootout + remove the plist
+;;   kbb install.cljk status     → print the agent state + tail the log
 ;; macOS launchd (per-user LaunchAgent). The repo root is resolved from this script's location, so a
 ;; post-merge re-install repoints automatically. NOTE: when run from a temporary git worktree the path
 ;; is ephemeral — re-run install from the merged checkout once kaname lands on main.
@@ -66,4 +66,4 @@
     "install"   (install)
     "uninstall" (uninstall)
     "status"    (status)
-    (do (println "usage: bb install.clj [install|uninstall|status]") (System/exit 2))))
+    (do (println "usage: kbb install.cljk [install|uninstall|status]") (System/exit 2))))
