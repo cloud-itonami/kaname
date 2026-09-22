@@ -23,7 +23,8 @@
             [kotoba.datom :as kd]
             #?(:clj [clojure.java.io :as io]
                :cljs [cljs.reader :as edn])
-            #?(:clj [babashka.process :as process])))
+            #?(:clj [babashka.process :as process]
+               :clj [babashka.fs :as bfs])))
 
 ;; ── node modules (kbb only; bb/JVM uses the platform originals) ───────────────
 
@@ -80,6 +81,29 @@
   #?(:clj (io/make-parents f)
      :cljs (.mkdirSync fs (.dirname path (path-str f)) #js {:recursive true})))
 
+(defn absolutize
+  "`(fs/absolutize f)` → an absolute path string (no trailing normalization beyond
+  collapsing ..). kbb resolves against process.cwd(); bb delegates to babashka.fs."
+  [f]
+  #?(:clj (str (bfs/absolutize f))
+     :cljs (let [p (path-str f)]
+             (if (.isAbsolute path p)
+               p
+               (.join path (.cwd js/process) p)))))
+
+(defn parent
+  "`(fs/parent f)` → the parent directory path string, or the empty string at /."
+  [f]
+  #?(:clj (some-> (bfs/parent f) str)
+     :cljs (let [d (.dirname path (path-str f))]
+             (if (or (= d "") (= d "/")) "" d))))
+
+(defn normalize
+  "`(fs/normalize f)` → collapse //, resolve . and .. lexically. No trailing slash."
+  [f]
+  #?(:clj (str (bfs/normalize f))
+     :cljs (.normalize path (path-str f))))
+
 ;; ── process environment ───────────────────────────────────────────────────────
 
 (defn getenv
@@ -98,6 +122,19 @@
              "user.dir" (.cwd js/process)
              "babashka.file" *file*
              nil)))
+
+(defn which
+  "`(fs/which \"kbb\")` → absolute path string of the first PATH hit, nil when absent."
+  [name]
+  #?(:clj (some-> (bfs/which name) str)
+     :cljs (let [dirs (remove str/blank? (str/split (or (getenv "PATH") "") #":"))
+                 probe (fn [d]
+                         (let [cand (path-join d name)]
+                           (try (when (and (.existsSync fs cand)
+                                           (bit-and (.-mode ^js (.statSync fs cand)) 73))
+                                  cand)
+                                (catch :default _ nil))))]
+             (some probe dirs))))
 
 ;; ── sha-256 (kotoba.datom host seam) ──────────────────────────────────────────
 
@@ -179,6 +216,20 @@
               :signal (.-signal r)
               :out (or (.-stdout r) "")
               :err (or (.-stderr r) "")})))
+
+(defn sh!
+  "One synchronous command, tolerant of nonzero exit AND of spawn failure (command not
+  found lands on spawnSync's status:null; sh already synthesizes exit 1 with the error
+  on :err). Same shape as `sh` — for launchctl bootout-style best-effort calls."
+  [& args]
+  (apply sh args))
+
+(defn sleep-ms
+  "`(Thread/sleep ms)`. kbb blocks with Atomics.wait (nbb is single-threaded synchronous
+  scripting; Promise/setTimeout cannot interrupt sync control flow — hakobi precedent :80)."
+  [ms]
+  #?(:clj (Thread/sleep ms)
+     :cljs (js/Atomics.wait (js/Int32Array. (js/SharedArrayBuffer. 4)) 0 0 ms)))
 
 (defn exit
   "`(System/exit code)`."

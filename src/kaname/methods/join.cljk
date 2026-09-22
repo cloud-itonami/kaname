@@ -16,7 +16,6 @@
   (:require [kotoba.lang.text :as str]
             [kaname.methods.sos :as sos]
             [kaname.nbb-compat :as compat]
-            #?(:clj [clojure.edn :as edn])
             #?(:clj [clojure.java.io :as io])))
 
 ;; ── parse a [e a v tx op] Datom-log into {:nodes :edges} ───────────────────────

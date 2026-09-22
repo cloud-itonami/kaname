@@ -1,55 +1,57 @@
 #!/usr/bin/env kbb
 ;; kaname 要 — install/uninstall the production heartbeat LaunchAgent (ADR-2606172100; deploy 実運用).
-;; babashka port of install.sh (clj-native deploy).
-;;   kbb install.cljk install    → render the plist from the template (repo root + bb resolved), load it, kickstart once
+;; babashka port of install.sh (clj-native deploy). Two hosts, one source:
+;;   kbb install.cljk install    → render the plist from the template (repo root + kbb resolved), load it, kickstart once
 ;;   kbb install.cljk uninstall  → bootout + remove the plist
 ;;   kbb install.cljk status     → print the agent state + tail the log
 ;; macOS launchd (per-user LaunchAgent). The repo root is resolved from this script's location, so a
 ;; post-merge re-install repoints automatically. NOTE: when run from a temporary git worktree the path
 ;; is ephemeral — re-run install from the merged checkout once kaname lands on main.
-(require '[babashka.fs :as fs]
-         '[babashka.process :as p]
+;; All platform symbols route through kaname.nbb-compat (the beat-path seam): node:fs /
+;; os.homedir / spawnSync / Atomics.wait under kbb, their clojure.java.io / System / babashka
+;; originals under bb. Same seam as run-heartbeat.cljk — one place to widen for the next host.
+(require '[kaname.nbb-compat :as compat]
          '[kotoba.lang.text :as str])
 
 (def label "com.etzhayyim.kaname.heartbeat")
-(def here  (str (fs/parent (fs/absolutize *file*))))
-(def repo  (str (fs/normalize (fs/absolutize (fs/path here "..")))))
-(def runner (or (some-> (fs/which "kbb") str)
+(def here  (compat/parent (compat/absolutize *file*)))
+(def repo  (compat/normalize (compat/parent here)))
+(def runner (or (compat/which "kbb")
                 "/Users/junkawasaki/.local/bin/kbb"))
-(def home  (System/getProperty "user.home"))
-(def plist (str home "/Library/LaunchAgents/" label ".plist"))
-(def log   (str home "/Library/Logs/kaname-heartbeat.log"))
-(def uid   (str/trim (:out (p/shell {:out :string} "id" "-u"))))
+(def home  #?(:clj (compat/get-property "user.home")
+              :cljs (.homedir (js/require "node:os"))))
+(def plist (compat/path-join home "Library/LaunchAgents" (str label ".plist")))
+(def log   (compat/path-join home "Library/Logs/kaname-heartbeat.log"))
+(def uid   (str/trim (:out (compat/sh "id" "-u"))))
 (def domain (str "gui/" uid))
 
 (defn- sh! "Run, tolerate non-zero (e.g. bootout when not loaded)." [& args]
-  (apply p/shell {:continue true :out :string :err :string} args))
+  (apply compat/sh! args))
 
 (defn- tail [path n]
-  (if (fs/exists? path)
-    (str/join "\n" (take-last n (str/split-lines (slurp path))))
+  (if (compat/exists? path)
+    (str/join "\n" (take-last n (str/split-lines (compat/slurp path))))
     "(no log)"))
 
 (defn install []
-  (fs/create-dirs (str home "/Library/LaunchAgents"))
-  (fs/create-dirs (str home "/Library/Logs"))
-  (let [rendered (-> (slurp (str (fs/path here "com.etzhayyim.kaname.heartbeat.plist.template")))
+  (let [rendered (-> (compat/slurp (compat/path-join here "com.etzhayyim.kaname.heartbeat.plist.template"))
                      (str/replace "@REPO@" repo)
                      (str/replace "@BB@" runner)
                      (str/replace "@HOME@" home))]
-    (spit plist rendered))
-  (fs/set-posix-file-permissions (str (fs/path here "run-heartbeat.cljk")) "rwxr-xr-x")
+    (compat/spit plist rendered))
+  (sh! "chmod" "755" (compat/path-join here "run-heartbeat.cljk"))
   (sh! "launchctl" "bootout" (str domain "/" label))                 ; idempotent reload
-  (p/shell "launchctl" "bootstrap" domain plist)
+  (compat/sh "launchctl" "bootstrap" domain plist)
   (println (str "installed + loaded: " plist " (repo=" repo " kbb=" runner ")"))
   (println "kickstarting one beat…")
-  (p/shell "launchctl" "kickstart" "-k" (str domain "/" label))
-  (Thread/sleep 6000)
+  (compat/sh "launchctl" "kickstart" "-k" (str domain "/" label))
+  (compat/sleep-ms 6000)
   (println (tail log 4)))
 
 (defn uninstall []
   (sh! "launchctl" "bootout" (str domain "/" label))
-  (fs/delete-if-exists plist)
+  #?(:clj (babashka.fs/delete-if-exists plist)
+     :cljs (try (.unlinkSync (deref #'compat/fs) plist) (catch :default _ nil)))
   (println (str "uninstalled: " label)))
 
 (defn status []
@@ -67,4 +69,4 @@
     "install"   (install)
     "uninstall" (uninstall)
     "status"    (status)
-    (do (println "usage: kbb install.cljk [install|uninstall|status]") (System/exit 2))))
+    (do (println "usage: kbb install.cljk [install|uninstall|status]") (compat/exit 2))))
