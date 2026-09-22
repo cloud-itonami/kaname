@@ -1,0 +1,187 @@
+(ns kaname.nbb-compat
+  "kaname host seam for the kbb engine (kotoba-lang/org-babashka-nbb: SCI on Node with .cljk
+  classpath resolution) — the tamaki scripts.nbb-compat pattern, narrowed to the beat path
+  (ADR port: run one kaname heartbeat under `kbb deploy/run-heartbeat.cljk`).
+
+  Two hosts, one source:
+    - bb/JVM branch delegates to the platform originals (clojure.java.io, System,
+      kotoba.datom's own MessageDigest sha-256, babashka.process). Kaname's JVM host is bb.
+    - kbb branch is Node: node:fs / node:path / node:crypto / node:child_process.
+
+  CID byte-identity across hosts is carried by kotoba.datom's OWN portable builders
+  (tx-cid / canonical-json / normalize-datoms / tx->edn-line / log-header — all public).
+  The only library seam this ns touches is *sha256-hex*, which is the library's documented
+  host contract (\"Rebind on hosts without MessageDigest\"). `install!` rebinds it
+  process-wide via alter-var-root (not `binding`: the library's internal call sites and any
+  later require must see it too). Shared library source is NOT modified.
+
+  kbb facts measured on this engine (t_4a9baf3a): sci analyzes fn bodies eagerly — a defn
+  body referencing a JVM-only symbol fails at ANALYSIS even if never called — so every
+  symbol here resolves on BOTH hosts (reader conditionals per branch, no JVM interop outside
+  #?(:clj …)). Requires are top-level: a require inside a fn body loses its async load."
+  (:require [kotoba.lang.text :as str]
+            [kotoba.datom :as kd]
+            #?(:clj [clojure.java.io :as io]
+               :cljs [cljs.reader :as edn])
+            #?(:clj [babashka.process :as process])))
+
+;; ── node modules (kbb only; bb/JVM uses the platform originals) ───────────────
+
+(def fs #?(:cljs (js/require "node:fs") :clj nil))
+(def path #?(:cljs (js/require "node:path") :clj nil))
+(def crypto #?(:cljs (js/require "node:crypto") :clj nil))
+(def child-process #?(:cljs (js/require "node:child_process") :clj nil))
+
+(defn ^:private path-str [f]
+  (cond (string? f) f
+        (some? f) (.-path f)
+        :else ""))
+
+;; ── file system (io/file / io/slurp / io/spit seam) ───────────────────────────
+
+(defn path-join
+  "`(str (io/file a b …))` as a pure string join. Same result on both hosts."
+  [& parts]
+  #?(:clj (str (apply io/file parts))
+     :cljs (reduce (fn [a b] (.join path (path-str a) (path-str b)))
+                   (path-str (first parts))
+                   (map path-str (rest parts)))))
+
+(defn exists?
+  "`(.exists (io/file f))`. Accepts a string (kbb) or a File (bb)."
+  [f]
+  #?(:clj (.exists (io/file f))
+     :cljs (try (.existsSync fs (path-str f)) (catch :default _ false))))
+
+(defn slurp
+  "Core slurp under a name that does not shadow itself. (bb's sci exposes core
+  slurp/spit but not io/slurp — and the ns-local `slurp` would self-shadow.)"
+  [f]
+  #?(:clj (clojure.core/slurp f)
+     :cljs (.readFileSync fs (path-str f) "utf8")))
+
+(defn spit
+  "Write a string to a file, creating parent directories (tamaki precedent)."
+  [f s]
+  #?(:clj (clojure.core/spit f s)
+     :cljs (do (.mkdirSync fs (.dirname path (path-str f)) #js {:recursive true})
+               (.writeFileSync fs (path-str f) (str s)))))
+
+(defn spit-append
+  "`(spit f s :append true)`."
+  [f s]
+  #?(:clj (clojure.core/spit f s :append true)
+     :cljs (do (.mkdirSync fs (.dirname path (path-str f)) #js {:recursive true})
+               (.appendFileSync fs (path-str f) (str s)))))
+
+(defn make-parents
+  "`(io/make-parents f)` — the parent directory of f only."
+  [f]
+  #?(:clj (io/make-parents f)
+     :cljs (.mkdirSync fs (.dirname path (path-str f)) #js {:recursive true})))
+
+;; ── process environment ───────────────────────────────────────────────────────
+
+(defn getenv
+  "`(System/getenv k)`, nil when unset."
+  [k]
+  #?(:clj (System/getenv k)
+     :cljs (aget (.-env js/process) k)))
+
+(defn get-property
+  "`(System/getProperty k)` for the properties the beat path reads.
+  `babashka.file` derefs *file* at CALL time, so it names the script being loaded
+  (sci binds *file* per file; the dynamic propagates into this body — tamaki precedent)."
+  [k]
+  #?(:clj (System/getProperty k)
+     :cljs (case k
+             "user.dir" (.cwd js/process)
+             "babashka.file" *file*
+             nil)))
+
+;; ── sha-256 (kotoba.datom host seam) ──────────────────────────────────────────
+
+(defn sha256-hex
+  "String → lowercase hex sha-256. bb/JVM: the library's own MessageDigest impl.
+  kbb: node:crypto — same digest bytes, same lowercase hex."
+  [s]
+  #?(:clj (kd/*sha256-hex* s)
+     :cljs (let [h (.createHash crypto "sha256")]
+             (.digest (.update h (str s) "utf8") "hex"))))
+
+(defn install!
+  "Rebind kotoba.datom/*sha256-hex* process-wide to this host's impl (the library's
+  documented contract). No-op on bb/JVM. Returns :kbb or :jvm. Call once per entry point,
+  BEFORE any CID is computed (kd/make-tx, read-log, bridge push all flow through it)."
+  []
+  #?(:cljs (do (alter-var-root #'kd/*sha256-hex* (constantly sha256-hex)) :kbb)
+     :clj :jvm))
+
+;; ── kotoba.datom file-backed edge (kd's are #?(:clj)-only) ────────────────────
+
+(defn read-log
+  "kotoba.datom/read-log: parsed txs oldest first, datoms normalized to \":…\" strings."
+  [log-path]
+  #?(:clj (kd/read-log log-path)
+     :cljs (if-not (exists? log-path)
+             []
+             (into []
+                   (comp (map str/trim)
+                         (remove #(or (str/blank? %) (str/starts-with? % ";")))
+                         (map edn/read-string)
+                         (map #(update % :tx/datoms kd/normalize-datoms)))
+                   (str/split-lines (slurp log-path))))))
+
+(defn append-tx!
+  "kotoba.datom/append-tx!: append ONE tx line (the log only ever grows). Returns the CID."
+  [tx log-path]
+  #?(:clj (kd/append-tx! tx log-path)
+     :cljs (do (make-parents log-path)
+               (when-not (exists? log-path) (spit log-path kd/log-header))
+               (spit-append log-path (str (kd/tx->edn-line tx) "\n"))
+               (:tx/cid tx))))
+
+(defn head-cid
+  "kotoba.datom/head-cid: the last tx's CID, \"\" on an empty/absent log."
+  [log-path]
+  #?(:clj (kd/head-cid log-path)
+     :cljs (or (:tx/cid (peek (read-log log-path))) "")))
+
+(defn verify-chain
+  "kotoba.datom/verify-chain: recompute every CID from (datoms, prev) — {:ok :length :broken-at}."
+  [log-path]
+  #?(:clj (kd/verify-chain log-path)
+     :cljs (let [txs (read-log log-path)]
+             (loop [i 0 prev ""]
+               (if (= i (count txs))
+                 {:ok true :length (count txs) :broken-at -1}
+                 (let [tx (nth txs i)]
+                   (if (or (not= (:tx/cid tx) (kd/tx-cid (:tx/datoms tx) prev))
+                           (not= (:tx/prev tx) prev))
+                     {:ok false :length (count txs) :broken-at i}
+                     (recur (inc i) (:tx/cid tx)))))))))
+
+
+;; ── subprocess / exit ─────────────────────────────────────────────────────────
+
+(defn sh
+  "One synchronous command, captured. bb: babashka.process/shell {:continue true :out :string}
+  (never throws on nonzero exit). kbb: spawnSync with a 64MB cap (Node's ~1MB default
+  truncates silently and reports status:null — the tamaki lesson). Returns
+  {:exit :out :err :signal}."
+  [& args]
+  #?(:clj (let [r (apply process/shell (concat (map str args) [{:continue true :out :string}]))]
+            {:exit (:exit r) :out (str (:out r)) :err (str (:err r)) :signal nil})
+     :cljs (let [r (.spawnSync child-process (str (first args))
+                                 (to-array (map str (rest args)))
+                                 #js {:encoding "utf8" :maxBuffer (* 64 1024 1024)})]
+             {:exit (or (.-status r) 1)
+              :signal (.-signal r)
+              :out (or (.-stdout r) "")
+              :err (or (.-stderr r) "")})))
+
+(defn exit
+  "`(System/exit code)`."
+  [code]
+  #?(:clj (System/exit code)
+     :cljs (.exit js/process code)))

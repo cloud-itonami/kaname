@@ -102,22 +102,23 @@
 
 ;; ── graph CID (KotobaCid::from_bytes parity) ──────────────────────────────────
 
-(defn- b32-lower ^String [^bytes bs]
-  (let [alphabet "abcdefghijklmnopqrstuvwxyz234567"
-        sb (StringBuilder.)
-        n (alength bs)]
-    (loop [i 0 buf 0 bits 0]
-      (cond
-        (>= bits 5)
-        (let [shift (- bits 5)]
-          (.append sb ^char (nth alphabet (bit-and (bit-shift-right buf shift) 0x1f)))
-          (recur i (bit-and buf (dec (bit-shift-left 1 shift))) shift))
-        (< i n)
-        (recur (inc i) (bit-or (bit-shift-left buf 8) (bit-and (long (aget bs i)) 0xff)) (+ bits 8))
-        :else
-        (do (when (pos? bits)
-              (.append sb ^char (nth alphabet (bit-and (bit-shift-left buf (- 5 bits)) 0x1f))))
-            (str sb))))))
+#?(:clj
+   (defn- b32-lower ^String [^bytes bs]
+     (let [alphabet "abcdefghijklmnopqrstuvwxyz234567"
+           sb (StringBuilder.)
+           n (alength bs)]
+     (loop [i 0 buf 0 bits 0]
+       (cond
+         (>= bits 5)
+         (let [shift (- bits 5)]
+           (.append sb ^char (nth alphabet (bit-and (bit-shift-right buf shift) 0x1f)))
+           (recur i (bit-and buf (dec (bit-shift-left 1 shift))) shift))
+         (< i n)
+         (recur (inc i) (bit-or (bit-shift-left buf 8) (bit-and (long (aget bs i)) 0xff)) (+ bits 8))
+         :else
+         (do (when (pos? bits)
+               (.append sb ^char (nth alphabet (bit-and (bit-shift-left buf (- 5 bits)) 0x1f))))
+             (str sb)))))))
 
 #?(:clj
    (defn graph-cid

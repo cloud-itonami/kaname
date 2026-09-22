@@ -15,6 +15,7 @@
   Pure fns; reuses kaname.methods.sos. Portable .cljc."
   (:require [kotoba.lang.text :as str]
             [kaname.methods.sos :as sos]
+            [kaname.nbb-compat :as compat]
             #?(:clj [clojure.edn :as edn])
             #?(:clj [clojure.java.io :as io])))
 
@@ -50,11 +51,10 @@
      {:nodes {} :node-order [] :edges []}
      (:order by-e))))
 
-#?(:clj
-   (defn read-datom-log
-     "Read a mirror's Datom-log EDN file → {:nodes :node-order :edges}."
-     [path]
-     (datoms->graph (sos/read-edn (slurp (str path))))))
+(defn read-datom-log
+  "Read a mirror's Datom-log EDN file → {:nodes :node-order :edges}."
+  [path]
+  (datoms->graph (sos/read-edn (compat/slurp (str path)))))
 
 (defn parse-graph
   "Auto-detect a mirror EDN graph: a vector of MAPS is a forms-graph (sos/load-graph); a vector of
@@ -66,11 +66,10 @@
       (vector? el) (datoms->graph forms)
       :else        {:nodes {} :node-order [] :edges []})))
 
-#?(:clj
-   (defn read-graph
-     "Read a mirror EDN file in EITHER format (forms-graph or Datom log) → {:nodes :node-order :edges}."
-     [path]
-     (parse-graph (sos/read-edn (slurp (str path))))))
+(defn read-graph
+  "Read a mirror EDN file in EITHER format (forms-graph or Datom log) → {:nodes :node-order :edges}."
+  [path]
+  (parse-graph (sos/read-edn (compat/slurp (str path)))))
 
 ;; ── lift a mirror graph into a kaname domain layer ────────────────────────────
 
@@ -233,51 +232,48 @@
               :kind-map {":concentrates" ":concentrates" ":depends-on" ":depends-on"
                          ":couples" ":couples" ":gates" ":gates"}}})
 
-#?(:clj
-   (defn default-resolution
-     "Repository resolution from explicit runtime configuration. External roots are an EDN
-     map in KANAME_MIRROR_ROOTS_EDN; no numbered-root layout is inferred."
-     []
-     {:actor-root (or (System/getenv "KANAME_REPO")
-                      (System/getProperty "user.dir"))
-      :repo-roots (if-let [raw (System/getenv "KANAME_MIRROR_ROOTS_EDN")]
-                    (edn/read-string raw)
-                    {})}))
+(defn default-resolution
+  "Repository resolution from explicit runtime configuration. External roots are an EDN
+  map in KANAME_MIRROR_ROOTS_EDN; no numbered-root layout is inferred."
+  []
+  {:actor-root (or (compat/getenv "KANAME_REPO")
+                   (compat/get-property "user.dir"))
+   :repo-roots (if-let [raw (compat/getenv "KANAME_MIRROR_ROOTS_EDN")]
+                 (sos/read-edn raw)
+                 {})})
 
-#?(:clj
-   (defn mirror-path
-     "Resolve an adapter only through an explicit repository-root map. `:self` resolves
-     against `:actor-root`; external mirrors require `:repo-roots {adapter-key root}`."
-     [{:keys [actor-root repo-roots]} k]
-     (let [{:keys [repository resource]} (mirror-adapters k)
-           root (if (= :self repository) actor-root (get repo-roots k))]
-       (when root (io/file root resource)))))
+(defn mirror-path
+  "Resolve an adapter only through an explicit repository-root map. `:self` resolves
+  against `:actor-root`; external mirrors require `:repo-roots {adapter-key root}`."
+  [{:keys [actor-root repo-roots]} k]
+  (let [{:keys [repository resource]} (mirror-adapters k)
+        root (if (= :self repository) actor-root (get repo-roots k))]
+    (when root (compat/path-join root resource))))
 
-#?(:clj
-   (defn join-mirrors
-     "Join several committed mirror outputs into ONE reconciled kaname multilayer graph.
-     Resolution is explicit: `{:actor-root <this repo> :repo-roots {:chie <repo> ...}}`.
-     `ks` is the adapter keys (default all whose resolved resource exists).
-     Returns {:forms reconciled-forms :graph {:nodes :node-order :edges} :loaded [adapter-keys]}."
-     [resolution & [ks opts]]
-     (let [ks (or ks (keys mirror-adapters))
-           normalize? (get opts :normalize true)   ; per-mirror max-load → 1.0 (fair cross-domain compare)
-           present (filter (fn [k] (some-> (mirror-path resolution k) .exists)) ks)
-           lifted (mapcat (fn [k]
-                            (let [{:keys [domain source kind-map weight-attr default-load]} (mirror-adapters k)
-                                  watt (or weight-attr ":en/grasping-load")
-                                  dload (or default-load 0.0)
-                                  g (read-graph (mirror-path resolution k))
-                                  maxl (reduce (fn [m e]
-                                                 (let [l (get e watt)]
-                                                   (max m (if (number? l) (double l) (double dload)))))
-                                               0.0 (:edges g))
-                                  scale (if (and normalize? (> maxl 1e-9)) (/ 1.0 maxl) 1.0)]
-                              (lift g domain source {:kind-map kind-map :weight-attr watt
-                                                     :default-load dload :scale scale})))
-                          present)
-           recon (reconcile-by-label (vec lifted))]
-       {:forms recon :graph (forms->graph recon) :loaded (vec present)})))
+(defn join-mirrors
+  "Join several committed mirror outputs into ONE reconciled kaname multilayer graph.
+  Resolution is explicit: `{:actor-root <this repo> :repo-roots {:chie <repo> ...}}`.
+  `ks` is the adapter keys (default all whose resolved resource exists).
+  Returns {:forms reconciled-forms :graph {:nodes :node-order :edges} :loaded [adapter-keys]}."
+  [resolution & [ks opts]]
+  (let [ks (or ks (keys mirror-adapters))
+        normalize? (get opts :normalize true)   ; per-mirror max-load → 1.0 (fair cross-domain compare)
+        present (filter (fn [k] (compat/exists? (mirror-path resolution k))) ks)
+        lifted (mapcat (fn [k]
+                         (let [{:keys [domain source kind-map weight-attr default-load]} (mirror-adapters k)
+                               watt (or weight-attr ":en/grasping-load")
+                               dload (or default-load 0.0)
+                               g (read-graph (mirror-path resolution k))
+                               maxl (reduce (fn [m e]
+                                              (let [l (get e watt)]
+                                                (max m (if (number? l) (double l) (double dload)))))
+                                            0.0 (:edges g))
+                               scale (if (and normalize? (> maxl 1e-9)) (/ 1.0 maxl) 1.0)]
+                           (lift g domain source {:kind-map kind-map :weight-attr watt
+                                                  :default-load dload :scale scale})))
+                       present)
+        recon (reconcile-by-label (vec lifted))]
+    {:forms recon :graph (forms->graph recon) :loaded (vec present)}))
 
 (defn- lstrip [s] (if (and (string? s) (str/starts-with? s ":")) (subs s 1) s))
 

@@ -14,6 +14,7 @@
   no-server-key (local file append only). Portable .cljc (bb)."
   (:require [kotoba.lang.text :as str]
             [kaname.methods.sos :as sos]
+            [kaname.nbb-compat :as compat]
             [kotoba.datom :as kd]
             #?(:clj [clojure.java.io :as io])))
 
@@ -58,7 +59,7 @@
   two beats would defeat idempotency-by-content (the compare would hit the checkpoint, not the
   prior readout)."
   [log-path]
-  (let [txs (kd/read-log log-path)
+  (let [txs (compat/read-log log-path)
         leverage (remove (fn [tx]
                            (some (fn [[_ _ a _]] (str/starts-with? (str a) ":bridge/"))
                                  (:tx/datoms tx)))
@@ -70,15 +71,15 @@
   :log-path}. Returns {:head cid :appended bool :reason (:no-change|nil) :count n}."
   [datoms {:keys [tx-id as-of log-path]}]
   (let [log-path (or log-path default-log)
-        prev (kd/head-cid log-path)
+        prev (compat/head-cid log-path)
         last-ds (last-datoms log-path)
         base {:count (count datoms) :head prev}]
     (if (= datoms last-ds)
       (assoc base :appended false :reason :no-change)
       (let [tx (kd/make-tx datoms {:tx-id tx-id :as-of as-of :prev-cid prev})]
         #?(:clj (io/make-parents log-path))
-        (let [head (kd/append-tx! tx log-path)]
+        (let [head (compat/append-tx! tx log-path)]
           (assoc base :appended true :reason nil :head head))))))
 
-(defn head [log-path] (kd/head-cid (or log-path default-log)))
-(defn verify [log-path] (kd/verify-chain (or log-path default-log)))
+(defn head [log-path] (compat/head-cid (or log-path default-log)))
+(defn verify [log-path] (compat/verify-chain (or log-path default-log)))
