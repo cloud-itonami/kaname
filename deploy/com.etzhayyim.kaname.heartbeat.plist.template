@@ -18,6 +18,8 @@
     <string>@REPO@</string>
     <key>KANAME_BB</key>
     <string>@BB@</string>
+    <key>PATH</key>
+    <string>/Users/junkawasaki/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
   </dict>
   <key>StartCalendarInterval</key>
   <dict>

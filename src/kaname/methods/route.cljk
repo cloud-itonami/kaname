@@ -18,6 +18,9 @@
             [kaname.methods.gates :as gates]
             #?(:clj [clojure.java.io :as io])))
 
+(defn- fmt3 [v] #?(:clj (format "%.3f" (double v))
+                   :cljs (.toFixed (js/Number v) 3)))
+
 (defn- recommend
   "Pick the opening-only route for node `nid` from its leverage structure. Returns a map
   {:id :label :route :rationale :leverage :C :V :bridge}. assert-route! re-checks the enum (G2)."
@@ -40,13 +43,13 @@
         rationale
         (case route
           ":insufficient-evidence" "already open / no concentration to dissolve"
-          ":route-around"          (str "mediates " v " layers with bridge-load " (format "%.3f" b)
+          ":route-around"          (str "mediates " v " layers with bridge-load " (fmt3 b)
                                          " — build a parallel path so the field does not depend on this single gate")
           ":decentralize"          (str "a cross-domain " (subs (str kind) 5) " spanning " v
                                          " domains — federate the gate so no one position holds it")
-          ":open"                  (str "concentration " (format "%.3f" c) " across " v
+          ":open"                  (str "concentration " (fmt3 c) " across " v
                                          " domains — open the position (open-standard / commons)")
-          ":add-redundancy"        (str "concentration " (format "%.3f" c)
+          ":add-redundancy"        (str "concentration " (fmt3 c)
                                          " in a narrow span — add a second source to remove the single point"))]
     (gates/assert-route! route)
     {:id nid :label (get node ":organism/label" nid)
@@ -81,7 +84,7 @@
     (doseq [[i r] (map-indexed vector recs)]
       (conj! L (str "| " (inc i) " | " (:label r) " | `"
                     (if (str/starts-with? (:route r) ":") (subs (:route r) 1) (:route r))
-                    "` | " (format "%.3f" (:leverage r)) " | " (:rationale r) " |")))
+                    "` | " (fmt3 (:leverage r)) " | " (:rationale r) " |")))
     (conj! L (str "\n---\n_kaname 要 · ADR-2606172100 · opening-only · the route enum cannot "
                   "express acquiring the 要. Live ingest / carried intervention G7/Council-gated._\n"))
     (str/join "\n" (persistent! L))))

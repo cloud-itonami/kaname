@@ -39,6 +39,9 @@
      :sent          false
      :server-key    false}))
 
+(defn- fmt3 [v] #?(:clj (format "%.3f" (double v))
+                   :cljs (.toFixed (js/Number v) 3)))
+
 (defn proposals
   "Build proposals for the top-`limit` leverage positions (deterministic order)."
   ([nodes res] (proposals nodes res 5))
@@ -69,7 +72,7 @@
     (doseq [[i p] (map-indexed vector ps)]
       (conj! L (str "| " (inc i) " | " (:target-label p) " | `"
                     (if (str/starts-with? (:route p) ":") (subs (:route p) 1) (:route p))
-                    "` | " (format "%.3f" (:leverage p)) " | " (:rationale p) " |")))
+                    "` | " (fmt3 (:leverage p)) " | " (:rationale p) " |")))
     (conj! L (str "\n---\n_kaname 要 · ADR-2606172100 · おせっかい → ossekai (ADR-2605264000) · "
                   "advisory/unsent · no-server-key. Carrying a proposal that touches a real "
                   "institution is G7/Council-gated (1 SBT = 1 vote)._\n"))

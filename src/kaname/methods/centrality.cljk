@@ -221,7 +221,8 @@
 
 ;; ── report ─────────────────────────────────────────────────────────────────────
 
-(defn- fmt3 [v] (format "%.3f" (double v)))
+(defn- fmt3 [v] #?(:clj (format "%.3f" (double v))
+                   :cljs (.toFixed (js/Number v) 3)))
 (defn- lstrip [s] (if (and (string? s) (str/starts-with? s ":")) (subs s 1) s))
 
 (defn report-md

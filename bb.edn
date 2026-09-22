@@ -2,11 +2,11 @@
  :deps {io.github.kotoba-lang/langgraph
         {:local/root "../../kotoba-lang/langgraph"}
         com.etzhayyim/kotoba-datom
-        {:local/root "../com-etzhayyim-kotoba-datom"}
+        {:local/root "../../etzhayyim/com-etzhayyim-kotoba-datom"}
         kotoba-lang/ie-flow
-        {:local/root "../com-etzhayyim-ie-flow"}
+        {:local/root "../../kotoba-lang/ie-flow"}
         com.etzhayyim/social-publication
-        {:local/root "../com-etzhayyim-social-publication"}}
+        {:local/root "../../kotoba-lang/social-publication"}}
  :tasks {test {:doc "Run all standalone kaname suites"
                :task (load-file "run_tests.cljk")}
          heartbeat {:doc "Run one repository-local heartbeat"

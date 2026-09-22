@@ -46,12 +46,7 @@
 (defn tokens
   "Lazy seq of significant tokens (group 1 of each tok-re match that captured)."
   [s]
-  (let [m (re-matcher tok-re s)]
-    ((fn step []
-       (lazy-seq
-        (when (.find m)
-          (let [t (.group m 1)]
-            (if (nil? t) (step) (cons t (step))))))))))
+  (keep second (re-seq tok-re s)))
 
 (defn atom-of
   "\"…\" → unescaped string; true/false/nil → bool/nil; \":…\" kept as string; int → long;
@@ -67,10 +62,12 @@
     (= t "nil") nil
     (str/starts-with? t ":") t
     :else
-    (let [as-long (try (Long/parseLong t) (catch #?(:clj Exception :cljs :default) _ ::nan))]
+    (let [as-long #?(:clj (try (Long/parseLong t) (catch Exception _ ::nan))
+                     :cljs (let [n (js/Number t)] (if (and (js/Number.isInteger n) (not (js/Number.isNaN n)) (js/Number.isSafeInteger n)) n ::nan)))]
       (if (not= as-long ::nan)
         as-long
-        (let [as-dbl (try (Double/parseDouble t) (catch #?(:clj Exception :cljs :default) _ ::nan))]
+        (let [as-dbl #?(:clj (try (Double/parseDouble t) (catch Exception _ ::nan))
+                        :cljs (let [n (js/Number t)] (if (js/Number.isNaN n) ::nan n)))]
           (if (not= as-dbl ::nan) as-dbl t))))))
 
 (def ^:private end-marker ::end)
@@ -220,7 +217,8 @@
 
 ;; ── report rendering ─────────────────────────────────────────────────────────
 
-(defn- fmt3 [v] (format "%.3f" (double v)))
+(defn- fmt3 [v] #?(:clj (format "%.3f" (double v))
+                   :cljs (.toFixed (js/Number v) 3)))
 (defn- lstrip-colon [s] (if (and (string? s) (str/starts-with? s ":")) (subs s 1) s))
 (defn- doms-str [s]
   (->> (sort s) (map lstrip-colon) (str/join "·")))

@@ -281,6 +281,11 @@
 
 (defn- lstrip [s] (if (and (string? s) (str/starts-with? s ":")) (subs s 1) s))
 
+(defn- fmt1 [v] #?(:clj (format "%.1f" (double v))
+                   :cljs (.toFixed (js/Number v) 1)))
+(defn- fmt3 [v] #?(:clj (format "%.3f" (double v))
+                   :cljs (.toFixed (js/Number v) 3)))
+
 (defn joined-report-md
   "Render the multi-mirror SoS leverage report: cross-domain entities (V≥2) + bridges. `res1` is the
   R1 result (kaname.methods.centrality/leverage-r1) so betweenness/L1 are available."
@@ -309,14 +314,14 @@
       (conj! L (str "| " (inc i) " | " (get-in nodes [nid ":organism/label"] nid)
                     " | " (domstr nid) " (V=" v ")"
                     " | " (srcstr nid)
-                    " | " (format "%.1f" (double (get-in res1 [:betweenness nid] 0.0)))
-                    " | " (format "%.3f" (double (get-in res1 [:leverage-r1 nid] 0.0))) " |")))
+                    " | " (fmt1 (get-in res1 [:betweenness nid] 0.0))
+                    " | " (fmt3 (get-in res1 [:leverage-r1 nid] 0.0)) " |")))
     (conj! L "\n## Highest-betweenness structural bridges (cross-layer chokepoints)\n")
     (conj! L "_The positions most shortest-paths run through — the connective chokepoints, routed to redundancy/route-around._\n")
     (conj! L "| rank | node | betweenness |")
     (conj! L "|---:|---|---:|")
     (doseq [[i [_ label b]] (map-indexed vector (sos/rank (:betweenness res1) nodes 10))]
-      (conj! L (str "| " (inc i) " | " label " | " (format "%.1f" b) " |")))
+      (conj! L (str "| " (inc i) " | " label " | " (fmt1 b) " |")))
     (conj! L (str "\n---\n_kaname 要 · ADR-2606172100 R1 · multi-mirror SoS join over committed mirror "
                   "outputs · per-mirror normalized · exact Brandes betweenness · map-not-target · "
                   "opening-only · non-adjudicating._\n"))
@@ -345,5 +350,5 @@
                             (sort-by (fn [[nid _]] [(- (double (get-in res1 [:leverage-r1 nid] 0.0))) nid]))
                             (take 6))]
          (println (str "    " (get-in nodes [nid ":organism/label"] nid)
-                       "  V=" v "  L1=" (format "%.3f" (get-in res1 [:leverage-r1 nid] 0.0)))))
+                       "  V=" v "  L1=" (fmt3 (get-in res1 [:leverage-r1 nid] 0.0)))))
        0)))
