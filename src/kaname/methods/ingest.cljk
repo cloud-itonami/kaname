@@ -22,7 +22,7 @@
   Pure where possible; the two side-effecting edges (HTTP fetch, Ollama call) are isolated. The
   form-building + guards are pure and deterministic (tested on a fixture extraction, no live Ollama)."
   (:require [kotoba.lang.text :as str]
-            #?(:clj [clojure.edn :as edn])
+            #?(:clj [kotoba.lang.edn :as edn])
             #?(:clj [babashka.http-client :as http])
             #?(:clj [cheshire.core :as json])
             #?(:clj [clojure.java.io :as io])))
