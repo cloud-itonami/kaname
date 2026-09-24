@@ -2,7 +2,7 @@
   "kaname 要 — langgraph-clj actor tests (ADR-2606172100 R1). The StateGraph compiles, the node fns
   flow state correctly, and a full perceive→…→persist run over the real mirrors produces the 要 and
   a verified commit-DAG (guarded — skips if sibling mirror outputs are absent)."
-  (:require [clojure.test :refer [deftest is testing run-tests]]
+  (:require [kotoba.test :refer [deftest is testing run-tests]]
             #?(:clj [clojure.java.io :as io])
             [kaname.methods.sos :as sos]
             [kaname.graph :as graph]

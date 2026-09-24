@@ -14,7 +14,7 @@
             [kaname.methods.kotoba :as kkot]
             [kaname.methods.kotoba-bridge :as bridge]
             [kotoba.datom :as kd]
-            #?(:clj [clojure.java.io :as io])))
+            #?(:clj [kotoba.io :as io])))
 
 (defn beat
   "Run one perceive→…→persist cycle, then (when :bridge?) push the local commit-DAG to the LIVE

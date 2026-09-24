@@ -5,3 +5,4 @@ data/persisted/
 
 # Clojure CLI classpath cache — machine-specific absolute paths, never shared
 .cpcache/
+.nbb/

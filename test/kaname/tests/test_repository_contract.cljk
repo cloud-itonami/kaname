@@ -1,18 +1,18 @@
 (ns kaname.tests.test-repository-contract
   (:require [cheshire.core :as json]
             [kotoba.lang.edn :as edn]
-            [clojure.java.io :as io]
-            [clojure.test :refer [deftest is]]))
+            [kotoba.io :as io]
+            [kotoba.test :refer [deftest is]]))
 
 (deftest canonical-and-wire-contract
   (let [contract (edn/read-string (slurp "repository-contracts.edn"))]
     (is (= :edn (get-in contract [:canonical :format])))
     (doseq [name ["leveragePoint" "osekkaiProposal"]]
-      (is (.isFile (io/file "lex" (str name ".edn"))))
+      (is (io/file? (io/file "lex" (str name ".edn"))))
       (let [doc (json/parse-string (slurp (io/file "wire/lexicons" (str name ".json"))))]
         (is (= (str "com.etzhayyim.kaname." name) (get doc "id")))))
     (doseq [path (:forbidden-root-paths contract)]
-      (is (not (.exists (io/file path)))))))
+      (is (not (io/exists? (io/file path)))))))
 
 (deftest exact-flat-west-dependencies
   (let [deps (edn/read-string (slurp "dependencies.edn"))]

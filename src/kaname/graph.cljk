@@ -25,7 +25,7 @@
             [kaname.methods.osekkai :as osekkai]
             [kaname.methods.kotoba :as kkot]
             #?(:clj [kaname.methods.ingest :as ingest])
-            #?(:clj [clojure.java.io :as io])))
+            #?(:clj [kotoba.io :as io])))
 
 ;; ── nodes ─────────────────────────────────────────────────────────────────────
 

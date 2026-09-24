@@ -1,7 +1,7 @@
 ;; kaname 要 — ie-flow embedding tests (the SoS scoring leg). ADR-2606212200.
 ;; Run through `kbb -M:test`; shared dependencies are SHA-pinned in bb.edn.
 (ns kaname.tests.test-ie-flow
-  (:require [clojure.test :refer [deftest is run-tests]]
+  (:require [kotoba.test :refer [deftest is run-tests]]
             [kaname.methods.ie-flow :as ief]
             [etzhayyim.ie-flow.score :as score]))
 

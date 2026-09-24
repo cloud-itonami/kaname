@@ -4,7 +4,7 @@
     G1 — person entities + person-referencing edges are dropped.
     G5 — an edge with no on-the-record basis is dropped.
     rel normalization + kind mapping + representative loads + :authoritative sourcing + namespacing."
-  (:require [clojure.test :refer [deftest is testing run-tests]]
+  (:require [kotoba.test :refer [deftest is testing run-tests]]
             [kotoba.lang.text :as str]
             [kaname.methods.ingest :as ingest]))
 

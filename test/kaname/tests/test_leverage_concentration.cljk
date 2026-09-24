@@ -7,7 +7,7 @@
   positions (no single chokepoint)? A structural read OF the leverage map (an aggregate distribution
   property, never a per-entity score / target-list)."
   (:require [kaname.methods.centrality :as c]
-            [clojure.test :refer [deftest is run-tests]]))
+            [kotoba.test :refer [deftest is run-tests]]))
 
 (defn- close? [x y] (< (Math/abs (- (double x) (double y))) 1e-9))
 

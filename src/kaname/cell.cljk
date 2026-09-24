@@ -15,7 +15,7 @@
   (:require [kaname.autorun :as autorun]
             [kaname.methods.join :as join]
             [kotoba.datom :as kd]
-            #?(:clj [clojure.java.io :as io])))
+            #?(:clj [kotoba.io :as io])))
 
 #?(:clj
    (defn- actor-dir []
