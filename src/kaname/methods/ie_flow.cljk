@@ -19,7 +19,7 @@
             [etzhayyim.ie-flow.gate-adapter :as ga]
             [etzhayyim.ie-flow.metrics :as iem]
             [kotoba.lang.text :as str]
-            #?(:clj [clojure.java.io :as io])))
+            #?(:clj [kotoba.io :as io])))
 
 (def default-seed
   (str (io/file (or (System/getenv "KANAME_REPO")

@@ -2,7 +2,7 @@
   "kaname 要 — kotoba commit-DAG persistence tests (ADR-2606172100 R1). The leverage readout projects
   to clean EAVT datoms (no ':'-prefixed values), persists idempotent-by-content, and the chain
   verifies (tamper-evident)."
-  (:require [clojure.test :refer [deftest is testing run-tests]]
+  (:require [kotoba.test :refer [deftest is testing run-tests]]
             [kotoba.lang.text :as str]
             #?(:clj [clojure.java.io :as io])
             [kaname.methods.sos :as sos]

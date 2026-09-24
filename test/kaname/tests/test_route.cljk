@@ -1,8 +1,8 @@
 (ns kaname.tests.test-route
   "kaname 要 — opening-route tests (ADR-2606172100; G2). The route enum can ONLY dissolve
   concentration; the 要 routes to route-around; capture is structurally unrepresentable."
-  (:require [clojure.test :refer [deftest is testing run-tests]]
-            #?(:clj [clojure.java.io :as io])
+  (:require [kotoba.test :refer [deftest is testing run-tests]]
+            #?(:clj [kotoba.io :as io])
             [kaname.methods.sos :as sos]
             [kaname.methods.route :as route]))
 

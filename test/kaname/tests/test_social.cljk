@@ -1,5 +1,5 @@
 (ns kaname.tests.test-social
-  (:require [clojure.test :refer [deftest is]]
+  (:require [kotoba.test :refer [deftest is]]
             [kaname.cells.social-post.state-machine :as state-machine]
             [kaname.methods.social :as social]))
 

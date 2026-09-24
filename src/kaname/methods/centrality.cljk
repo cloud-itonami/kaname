@@ -20,7 +20,7 @@
   Portable .cljc (clj-native). Full multiplex eigenvector-versatility (De Domenico et al.) over the
   tensor stays a future refinement; this R1 ships exact projection betweenness + ΔΦ."
   (:require [kotoba.lang.text :as str]
-            [clojure.set :as set]
+            [kotoba.lang.coll :as set]
             [kaname.methods.sos :as sos]
             #?(:clj [clojure.java.io :as io])))
 

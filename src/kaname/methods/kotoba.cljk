@@ -15,7 +15,7 @@
   (:require [kotoba.lang.text :as str]
             [kaname.methods.sos :as sos]
             [kotoba.datom :as kd]
-            #?(:clj [clojure.java.io :as io])))
+            #?(:clj [kotoba.io :as io])))
 
 (def default-log "data/persisted/kaname.leverage.kotoba.edn")
 

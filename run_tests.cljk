@@ -1,5 +1,5 @@
 #!/usr/bin/env kbb
-(require '[clojure.test :as t])
+(require '[kotoba.test :as t])
 
 (def suites
   '[kaname.tests.test-bridge

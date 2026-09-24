@@ -1,6 +1,6 @@
 (ns kaname.tests.test-energy-join
   "Energy-domain adapter tests without an implicit sibling checkout."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [kaname.methods.join :as join]
             [kaname.methods.sos :as sos]))
 

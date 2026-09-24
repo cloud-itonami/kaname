@@ -3,7 +3,7 @@
     G2 — route is opening-only; capture/seize/control refused.
     G1 — natural person + coordinate refused (public ROLE allowed).
     G5 — belief-content score refused; :influences must carry an on-the-record :en/basis."
-  (:require [clojure.test :refer [deftest is testing run-tests]]
+  (:require [kotoba.test :refer [deftest is testing run-tests]]
             [kaname.methods.gates :as gates]))
 
 (deftest test-g2-route-opening-only

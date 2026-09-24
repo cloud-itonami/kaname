@@ -1,8 +1,8 @@
 (ns kaname.tests.test-centrality
   "kaname 要 — R1 centrality tests (ADR-2606172100 R1). Exact Brandes betweenness, eigenvector,
   ΔΦ percolation sensitivity all converge on the cross-domain Accreditation Interface as the 要."
-  (:require [kotoba.lang.text] [clojure.test :refer [deftest is testing run-tests]]
-            #?(:clj [clojure.java.io :as io])
+  (:require [kotoba.lang.text] [kotoba.test :refer [deftest is testing run-tests]]
+            #?(:clj [kotoba.io :as io])
             [kaname.methods.sos :as sos]
             [kaname.methods.centrality :as c]))
 
