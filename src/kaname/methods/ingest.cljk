@@ -25,7 +25,7 @@
             #?(:clj [kotoba.lang.edn :as edn])
             #?(:clj [babashka.http-client :as http])
             #?(:clj [cheshire.core :as json])
-            #?(:clj [clojure.java.io :as io])))
+            #?(:clj [kotoba.io :as io])))
 
 (def ollama-model "hf.co/unsloth/gemma-4-E4B-it-qat-GGUF:UD-Q4_K_XL")
 
@@ -218,10 +218,10 @@
      "Operator demo: extract every pre-fetched *.txt under `dir` (filename stem = source slug) using
      the sidecar `<stem>.url` for the basis URL, all into `domain`/`source`. Writes nothing; returns forms."
      [dir domain source]
-     (let [files (->> (.listFiles (io/file dir)) (filter #(str/ends-with? (.getName %) ".txt")) sort)]
+     (let [files (->> (io/list-files (io/file dir)) (filter #(str/ends-with? (io/file-name %) ".txt")) sort)]
        (vec (mapcat (fn [f]
-                      (let [stem (str/replace (.getName f) #"\.txt$" "")
+                      (let [stem (str/replace (io/file-name f) #"\.txt$" "")
                             urlf (io/file dir (str stem ".url"))
-                            url (if (.exists urlf) (str/trim (slurp urlf)) (str "ingested:" stem))]
+                            url (if (io/exists? urlf) (str/trim (slurp urlf)) (str "ingested:" stem))]
                         (->forms (ollama-extract (slurp f)) domain source url)))
                     files)))))

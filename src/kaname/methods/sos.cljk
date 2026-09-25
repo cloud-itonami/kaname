@@ -35,7 +35,7 @@
   EDN reader, ':…' keywords kept as strings, pure fns, deterministic ordering by (-value, id),
   file I/O only at edges. Portable .cljc (clj-native — no Python twin)."
   (:require [kotoba.lang.text :as str]
-            #?(:clj [clojure.java.io :as io])))
+            #?(:clj [kotoba.io :as io])))
 
 ;; ── minimal EDN reader (subset: vectors [], maps {}, :keyword, "string", num, bool, nil) ──
 ;; Keywords are kept as ":ns/name" strings so the whole pipeline stays string-keyed.
@@ -300,7 +300,7 @@
      "CLI entry: analyze a seed multilayer EDN graph → out/leverage-report.md."
      [& argv]
      (let [argv (vec argv)
-           here (-> *file* io/file .getParentFile .getParentFile)
+           here (-> *file* io/file io/parent-file io/parent-file)
            seed (if (and (seq argv) (not (str/starts-with? (first argv) "--")))
                   (io/file (first argv))
                   (io/file here "data" "seed-sos.kotoba.edn"))
@@ -309,7 +309,7 @@
                     (io/file here "out"))
            {:keys [nodes edges]} (load-file* seed)
            res (leverage nodes edges)]
-       (.mkdirs outdir)
+       (io/mkdirs outdir)
        (spit (io/file outdir "leverage-report.md") (report-md nodes edges res))
        (println (str "kaname: " (count nodes) " nodes, " (count edges) " 縁 across " D
                      " domains → " (io/file outdir "leverage-report.md")))

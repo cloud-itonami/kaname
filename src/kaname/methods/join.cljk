@@ -16,7 +16,7 @@
   (:require [kotoba.lang.text :as str]
             [kaname.methods.sos :as sos]
             #?(:clj [kotoba.lang.edn :as edn])
-            #?(:clj [clojure.java.io :as io])))
+            #?(:clj [kotoba.io :as io])))
 
 ;; ── parse a [e a v tx op] Datom-log into {:nodes :edges} ───────────────────────
 
@@ -262,7 +262,7 @@
      [resolution & [ks opts]]
      (let [ks (or ks (keys mirror-adapters))
            normalize? (get opts :normalize true)   ; per-mirror max-load → 1.0 (fair cross-domain compare)
-           present (filter (fn [k] (some-> (mirror-path resolution k) .exists)) ks)
+           present (filter (fn [k] (some-> (mirror-path resolution k) io/exists?)) ks)
            lifted (mapcat (fn [k]
                             (let [{:keys [domain source kind-map weight-attr default-load]} (mirror-adapters k)
                                   watt (or weight-attr ":en/grasping-load")
@@ -335,7 +335,7 @@
            res (sos/leverage nodes edges)
            res1 (require 'kaname.methods.centrality)
            res1 ((resolve 'kaname.methods.centrality/leverage-r1) nodes edges res)]
-       (.mkdirs outdir)
+       (io/mkdirs outdir)
        (spit (io/file outdir "joined-sos-leverage.md") (joined-report-md nodes edges res1 loaded))
        (println (str "kaname multi-mirror join: " (pr-str loaded)))
        (println (str "  reconciled graph: " (count nodes) " nodes, " (count edges) " 縁"))

@@ -13,7 +13,7 @@
   Reuses kaname.methods.sos. Node walk order = first-touch EDN read order (deterministic)."
   (:require [kotoba.lang.text :as str]
             [kaname.methods.sos :as sos]
-            #?(:clj [clojure.java.io :as io])))
+            #?(:clj [kotoba.io :as io])))
 
 (def node-attrs
   [":organism/kind" ":organism/label" ":organism/sourcing" ":sos/open?" ":sos/role"])
@@ -105,7 +105,7 @@
    (defn -main
      [& argv]
      (let [argv (vec argv)
-           here (-> *file* io/file .getParentFile .getParentFile)
+           here (-> *file* io/file io/parent-file io/parent-file)
            seed (if (and (seq argv) (not (str/starts-with? (first argv) "--")))
                   (io/file (first argv))
                   (io/file here "data" "seed-sos.kotoba.edn"))
@@ -114,7 +114,7 @@
            {:keys [nodes node-order edges]} (sos/load-file* seed)
            res (sos/leverage nodes edges)
            out (io/file outdir "sos-leverage-datoms.kotoba.edn")]
-       (.mkdirs outdir)
+       (io/mkdirs outdir)
        (spit out (emit nodes node-order edges res tx))
        (println (str "kaname datom log → " out " (" (count nodes) " nodes + " (count edges)
                      " 縁, tx=" tx ")"))
