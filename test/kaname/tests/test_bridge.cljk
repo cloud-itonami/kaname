@@ -1,7 +1,7 @@
 (ns kaname.tests.test-bridge
   "kaname 要 — LIVE-engine bridge tests (ADR-2606172100 R1). Deterministic: host allowlist, graph-CID
   parity, tx_edn provenance, and the exactly-once cursor — all via a STUB transport (no live engine)."
-  (:require [kotoba.test :refer [deftest is testing run-tests]]
+  (:require [kotoba.lang.error :as kerror] [kotoba.test :refer [deftest is testing run-tests]]
             [kotoba.lang.text :as str]
             #?(:clj [clojure.java.io :as io])
             [kaname.methods.sos :as sos]
@@ -17,8 +17,8 @@
   (testing "fleet hosts pass; anything else is refused BEFORE I/O (charter invariant)"
     (is (nil? (br/assert-kotoba "http://127.0.0.1:8077/x")))
     (is (nil? (br/assert-kotoba "http://192.168.1.70:8077/x")))
-    (is (thrown? clojure.lang.ExceptionInfo (br/assert-kotoba "http://evil.example.com:8077/x")))
-    (is (thrown? clojure.lang.ExceptionInfo (br/assert-kotoba "https://127.0.0.1:8077/x")))))  ; lookalike scheme
+    (is (thrown? kerror/ExceptionInfo (br/assert-kotoba "http://evil.example.com:8077/x")))
+    (is (thrown? kerror/ExceptionInfo (br/assert-kotoba "https://127.0.0.1:8077/x")))))  ; lookalike scheme
 
 #?(:clj
    (deftest test-graph-cid
@@ -112,6 +112,6 @@
 ;; or without a configured secret. A bearer token is not a substitute for it.
 (deftest allowlist-still-enforced-alongside-internal-trust
   (with-redefs [br/internal-trust (constantly synthetic-trust)]
-    (is (thrown? clojure.lang.ExceptionInfo
+    (is (thrown? kerror/ExceptionInfo
                  (br/default-transport "http://evil.example.com/x" {}
                                        {:http-post (fn [& _] {:status "ok"})})))))

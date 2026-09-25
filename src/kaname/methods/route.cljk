@@ -16,7 +16,7 @@
   (:require [kotoba.lang.text :as str]
             [kaname.methods.sos :as sos]
             [kaname.methods.gates :as gates]
-            #?(:clj [clojure.java.io :as io])))
+            #?(:clj [kotoba.io :as io])))
 
 (defn- recommend
   "Pick the opening-only route for node `nid` from its leverage structure. Returns a map
@@ -90,14 +90,14 @@
    (defn -main
      [& argv]
      (let [argv (vec argv)
-           here (-> *file* io/file .getParentFile .getParentFile)
+           here (-> *file* io/file io/parent-file io/parent-file)
            seed (if (and (seq argv) (not (str/starts-with? (first argv) "--")))
                   (io/file (first argv))
                   (io/file here "data" "seed-sos.kotoba.edn"))
            outdir (io/file here "out")
            {:keys [nodes edges]} (sos/load-file* seed)
            res (sos/leverage nodes edges)]
-       (.mkdirs outdir)
+       (io/mkdirs outdir)
        (spit (io/file outdir "opening-route.md") (report-md nodes res))
        (when-let [r (route-point nodes res)]
          (println (str "kaname route 要: " (:label r) " → " (:route r))))

@@ -18,7 +18,7 @@
             [kaname.methods.sos :as sos]
             [kaname.methods.route :as route]
             [kaname.methods.gates :as gates]
-            #?(:clj [clojure.java.io :as io])))
+            #?(:clj [kotoba.io :as io])))
 
 (defn proposal
   "Build the おせっかい proposal for a single recommendation map (from route/recommend).
@@ -79,14 +79,14 @@
    (defn -main
      [& argv]
      (let [argv (vec argv)
-           here (-> *file* io/file .getParentFile .getParentFile)
+           here (-> *file* io/file io/parent-file io/parent-file)
            seed (if (and (seq argv) (not (str/starts-with? (first argv) "--")))
                   (io/file (first argv))
                   (io/file here "data" "seed-sos.kotoba.edn"))
            outdir (io/file here "out")
            {:keys [nodes edges]} (sos/load-file* seed)
            res (sos/leverage nodes edges)]
-       (.mkdirs outdir)
+       (io/mkdirs outdir)
        (spit (io/file outdir "osekkai-handoff.md") (report-md nodes res))
        (when-let [p (point-proposal nodes res)]
          (println (str "kaname おせっかい: " (:target-label p) " → " (:route p)

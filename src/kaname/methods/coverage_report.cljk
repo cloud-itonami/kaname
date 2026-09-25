@@ -15,7 +15,7 @@
   Pure fns; reuses kaname.methods.sos. Portable .cljc."
   (:require [kotoba.lang.text :as str]
             [kaname.methods.sos :as sos]
-            #?(:clj [clojure.java.io :as io])))
+            #?(:clj [kotoba.io :as io])))
 
 (def expected-kinds
   [":sos/entity" ":sos/interface" ":sos/instrument" ":sos/role"])
@@ -93,13 +93,13 @@
    (defn -main
      [& argv]
      (let [argv (vec argv)
-           here (-> *file* io/file .getParentFile .getParentFile)
+           here (-> *file* io/file io/parent-file io/parent-file)
            seed (if (and (seq argv) (not (str/starts-with? (first argv) "--")))
                   (io/file (first argv))
                   (io/file here "data" "seed-sos.kotoba.edn"))
            outdir (io/file here "out")
            {:keys [nodes edges]} (sos/load-file* seed)]
-       (.mkdirs outdir)
+       (io/mkdirs outdir)
        (spit (io/file outdir "coverage-report.md") (report-md (coverage nodes edges)))
        (println (str "kaname coverage → " (io/file outdir "coverage-report.md")))
        0)))
