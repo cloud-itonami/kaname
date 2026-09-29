@@ -39,4 +39,4 @@ ossekai 御節介 — carries the intervention (consent-bound)
 ```
 
 clj-native (`.cljc`, babashka). 24 tests / 78 assertions green. Synthetic seed; live mirror join is
-G7/Council-gated. See `CLAUDE.md` for the full design.
+G7/Council-gated. See `AGENTS.md` for the full design.
